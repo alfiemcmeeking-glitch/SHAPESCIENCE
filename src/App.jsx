@@ -66,231 +66,43 @@ function FilmGrain() {
 /* ─── CURSOR — B&W CIRCLE WITH MANGA-STYLE FLOWING SMOKE TENDRILS ─── */
 function Cursor() {
   const dotRef = useRef(null);
-  const canvasRef = useRef(null);
-  const puffsRef = useRef([]);
-  const mouseRef = useRef({ x: -100, y: -100 });
-  const lastSpawnRef = useRef(0);
+  const [hovering, setHovering] = useState(false);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-
-    const resize = () => {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = window.innerWidth + "px";
-      canvas.style.height = window.innerHeight + "px";
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    /* Draw a manga-style tendril puff:
-     * a flowing tapered shape with a bulbous head and a curved tail,
-     * like calligraphy or a comet. Built from a chain of overlapping
-     * circles whose radii taper from head to tail, traced as a single
-     * closed envelope and stroked in black + filled white.
-     */
-    const drawTendril = (puff, opacity) => {
-      const { x, y, angle, length, headSize, curl, wiggle, life } = puff;
-      const segments = 10;
-      const points = [];
-
-      // Build a curved spine: start at head, sweep with curl
-      for (let i = 0; i <= segments; i++) {
-        const t = i / segments;
-        // Curl bends the path
-        const segAngle = angle + curl * t + Math.sin(t * 6 + wiggle) * 0.15;
-        const dist = t * length;
-        const px = x + Math.cos(segAngle) * dist * 0.3 + Math.cos(angle + curl * t * 0.5) * dist * 0.7;
-        const py = y + Math.sin(segAngle) * dist * 0.3 + Math.sin(angle + curl * t * 0.5) * dist * 0.7;
-        // Radius tapers from head (full) to tail (point)
-        const taper = Math.pow(1 - t, 1.4);
-        const r = headSize * taper * (0.85 + Math.sin(t * 8 + wiggle * 2) * 0.15);
-        points.push({ x: px, y: py, r });
-      }
-
-      // Build envelope: walk one side then back along the other
-      // For each segment, compute perpendicular offsets
-      const left = [];
-      const right = [];
-      for (let i = 0; i < points.length; i++) {
-        const p = points[i];
-        const pPrev = points[Math.max(0, i - 1)];
-        const pNext = points[Math.min(points.length - 1, i + 1)];
-        const dx = pNext.x - pPrev.x;
-        const dy = pNext.y - pPrev.y;
-        const len = Math.sqrt(dx * dx + dy * dy) || 1;
-        const nx = -dy / len;
-        const ny = dx / len;
-        left.push({ x: p.x + nx * p.r, y: p.y + ny * p.r });
-        right.push({ x: p.x - nx * p.r, y: p.y - ny * p.r });
-      }
-
-      ctx.save();
-      ctx.globalAlpha = opacity;
-
-      // Build smooth path through left side, around the tail tip, back through right
-      ctx.beginPath();
-      ctx.moveTo(left[0].x, left[0].y);
-      for (let i = 1; i < left.length; i++) {
-        const p0 = left[i - 1];
-        const p1 = left[i];
-        const cx = (p0.x + p1.x) / 2;
-        const cy = (p0.y + p1.y) / 2;
-        ctx.quadraticCurveTo(p0.x, p0.y, cx, cy);
-      }
-      ctx.lineTo(left[left.length - 1].x, left[left.length - 1].y);
-      // Tail tip
-      ctx.lineTo(right[right.length - 1].x, right[right.length - 1].y);
-      for (let i = right.length - 2; i >= 0; i--) {
-        const p0 = right[i + 1];
-        const p1 = right[i];
-        const cx = (p0.x + p1.x) / 2;
-        const cy = (p0.y + p1.y) / 2;
-        ctx.quadraticCurveTo(p0.x, p0.y, cx, cy);
-      }
-      ctx.closePath();
-
-      // White fill
-      ctx.fillStyle = "#ffffff";
-      ctx.fill();
-
-      // Black manga outline — variable width based on head size
-      ctx.lineWidth = Math.max(1.4, headSize * 0.15);
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#000000";
-      ctx.stroke();
-
-      // Inner highlight stroke — a thinner black line offset toward the head,
-      // creates the cel-shaded "second line" look from the reference
-      if (headSize > 4) {
-        ctx.beginPath();
-        const headInner = points[1];
-        const innerR = headInner.r * 0.55;
-        ctx.arc(headInner.x - Math.cos(angle) * innerR * 0.4,
-                headInner.y - Math.sin(angle) * innerR * 0.4,
-                innerR, 0, Math.PI * 2);
-        ctx.lineWidth = Math.max(1, headSize * 0.1);
-        ctx.strokeStyle = "#000000";
-        ctx.stroke();
-      }
-
-      ctx.restore();
-    };
-
     const move = (e) => {
-      const dx = e.clientX - mouseRef.current.x;
-      const dy = e.clientY - mouseRef.current.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      mouseRef.current.x = e.clientX;
-      mouseRef.current.y = e.clientY;
-
       if (dotRef.current) {
         dotRef.current.style.transform = `translate(${e.clientX - 9}px, ${e.clientY - 9}px)`;
       }
 
-      // Spawn tendrils only when actually moving — throttle
-      const now = performance.now();
-      if (dist > 2 && now - lastSpawnRef.current > 70) {
-        lastSpawnRef.current = now;
-
-        // Direction the smoke trails (opposite of mouse motion)
-        const trailAngle = Math.atan2(-dy, -dx);
-
-        // Spawn 1-2 tendrils with slight angular variation
-        const count = Math.min(2, Math.ceil(dist / 12));
-        for (let i = 0; i < count; i++) {
-          const angleOffset = (Math.random() - 0.5) * 0.7;
-          puffsRef.current.push({
-            x: e.clientX + Math.cos(trailAngle) * 6,
-            y: e.clientY + Math.sin(trailAngle) * 6,
-            // Velocity drifts upward and outward
-            vx: Math.cos(trailAngle) * 0.5 + (Math.random() - 0.5) * 0.3,
-            vy: Math.sin(trailAngle) * 0.5 - 0.4 + (Math.random() - 0.5) * 0.3,
-            angle: trailAngle + angleOffset,
-            length: 22 + Math.random() * 18,
-            headSize: 6 + Math.random() * 4,
-            curl: (Math.random() - 0.5) * 1.4,
-            curlSpeed: (Math.random() - 0.5) * 0.008,
-            wiggle: Math.random() * Math.PI * 2,
-            life: 1,
-            growth: 0,
-          });
+      // Detect whether we're over a clickable element.
+      // React's onClick doesn't leave a DOM attribute, so we detect via React Fiber.
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (!el) { setHovering(false); return; }
+      let cur = el;
+      let isClickable = false;
+      while (cur && cur !== document.body) {
+        const tag = cur.tagName;
+        if (tag === "A" || tag === "BUTTON" || tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+          isClickable = true; break;
         }
+        if (cur.getAttribute && (cur.getAttribute("role") === "button" || cur.hasAttribute("data-clickable"))) {
+          isClickable = true; break;
+        }
+        // Check React Fiber for onClick prop
+        const fiberKey = Object.keys(cur).find(k => k.startsWith("__reactProps"));
+        if (fiberKey && cur[fiberKey] && cur[fiberKey].onClick) {
+          isClickable = true; break;
+        }
+        cur = cur.parentElement;
       }
+      setHovering(isClickable);
     };
     window.addEventListener("mousemove", move);
-
-    let raf;
-    const tick = () => {
-      // Cap puff count
-      if (puffsRef.current.length > 50) {
-        puffsRef.current.splice(0, puffsRef.current.length - 50);
-      }
-
-      ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-
-      puffsRef.current = puffsRef.current.filter((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy -= 0.015; // upward buoyancy
-        p.vx *= 0.97;
-        p.vy *= 0.97;
-        p.life -= 0.022;
-        p.curl += p.curlSpeed;
-        p.wiggle += 0.04;
-        p.growth = Math.min(1, p.growth + 0.08);
-
-        if (p.life <= 0) return false;
-
-        // Grow in quickly, hold, then fade
-        const grownPuff = {
-          ...p,
-          length: p.length * (0.4 + p.growth * 0.6) * (1 + (1 - p.life) * 0.5),
-          headSize: p.headSize * (0.5 + p.growth * 0.5) * (1 + (1 - p.life) * 0.3),
-        };
-
-        // Opacity: fade in fast, hold, fade out
-        let opacity;
-        if (p.life > 0.85) opacity = (1 - p.life) / 0.15; // fade in
-        else if (p.life > 0.25) opacity = 1; // hold
-        else opacity = p.life / 0.25; // fade out
-
-        drawTendril(grownPuff, opacity);
-        return true;
-      });
-
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-
-    return () => {
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("resize", resize);
-      cancelAnimationFrame(raf);
-    };
+    return () => window.removeEventListener("mousemove", move);
   }, []);
 
   return (
     <>
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          zIndex: 99998,
-          pointerEvents: "none",
-        }}
-      />
       <div
         ref={dotRef}
         style={{
@@ -300,12 +112,12 @@ function Cursor() {
           width: 18,
           height: 18,
           borderRadius: "50%",
-          background: "#000",
-          border: "2px solid #fff",
+          background: hovering ? "#d42020" : "transparent",
+          border: hovering ? "2px solid #d42020" : "2px solid #fff",
           zIndex: 99999,
           pointerEvents: "none",
-          willChange: "transform",
-          mixBlendMode: "difference",
+          willChange: "transform, background, border",
+          transition: "background 0.15s ease, border-color 0.15s ease",
         }}
       />
     </>
@@ -401,7 +213,7 @@ function Nav({ page, setPage }) {
       <div className="hl" style={{fontSize:18,letterSpacing:"0.08em",cursor:"none"}}
         onClick={()=>setPage("HOME")}>SHAPE SCIENCE</div>
       <div style={{display:"flex",gap:28}} className="desktop-nav">
-        {PAGES.filter(p=>p!=="RESULTS").map(p=>(
+        {PAGES.map(p=>(
           <div key={p} className="bt" onClick={()=>setPage(p)} style={{
             fontSize:13,letterSpacing:"0.1em",fontWeight:p===page?400:300,
             opacity:p===page?1:0.7,transition:"opacity 0.4s",cursor:"none",
@@ -423,7 +235,7 @@ function Nav({ page, setPage }) {
           position:"fixed",inset:0,background:"rgba(0,0,0,0.97)",zIndex:8999,
           display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",gap:36,
         }}>
-          {PAGES.filter(p=>p!=="RESULTS").map(p=>(
+          {PAGES.map(p=>(
             <div key={p} className="hl" onClick={()=>{setPage(p);setMenuOpen(false);}} style={{
               fontSize:32,opacity:p===page?1:0.5,cursor:"none",
             }}>{p}</div>
@@ -484,13 +296,7 @@ function HomePage({ setPage }) {
         height:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",
         position:"relative",overflow:"hidden",
       }}>
-        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at center,#111 0%,#000 70%)"}}>
-          <div style={{
-            position:"absolute",inset:0,opacity:0.03,
-            background:`repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.03) 2px,rgba(255,255,255,0.03) 4px)`,
-            animation:"flicker 3s infinite",
-          }}/>
-        </div>
+        <div style={{position:"absolute",inset:0,background:"#000"}}/>
         <div style={{
           position:"relative",zIndex:1,textAlign:"center",
           opacity:visible?1:0,transform:visible?"translateY(0)":"translateY(40px)",
@@ -1065,6 +871,7 @@ function ResultsPage() {
   const [error, setError] = useState(false);
   const [activeSector, setActiveSector] = useState("ALL");
   const [responses, setResponses] = useState([]);
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     if (unlocked) {
@@ -1082,18 +889,15 @@ function ResultsPage() {
     }
   };
 
+  // PASSWORD GATE
   if (!unlocked) {
     return (
       <section style={{
         minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",
         padding:"120px 24px",
       }}>
-        <div className="bt" style={{
-          fontSize:10,letterSpacing:"0.4em",opacity:0.4,marginBottom:24,
-        }}>RESTRICTED</div>
-        <div className="hl" style={{
-          fontSize:"clamp(40px,8vw,90px)",letterSpacing:"-0.02em",marginBottom:48,textAlign:"center",
-        }}>RESULTS</div>
+        <div className="bt" style={{fontSize:10,letterSpacing:"0.4em",opacity:0.4,marginBottom:24}}>RESTRICTED</div>
+        <div className="hl" style={{fontSize:"clamp(40px,8vw,90px)",letterSpacing:"-0.02em",marginBottom:48,textAlign:"center"}}>RESULTS</div>
         <input
           type="password"
           value={pw}
@@ -1113,32 +917,36 @@ function ResultsPage() {
           marginTop:32,padding:"12px 48px",border:"1px solid rgba(255,255,255,0.3)",
           fontSize:12,letterSpacing:"0.2em",cursor:"none",textTransform:"uppercase",
           transition:"all 0.4s",
-        }}
-        onMouseEnter={e=>{e.target.style.background="rgba(255,255,255,0.06)";e.target.style.borderColor="#fff";}}
-        onMouseLeave={e=>{e.target.style.background="transparent";e.target.style.borderColor="rgba(255,255,255,0.3)";}}
-        >Unlock</div>
+        }}>Unlock</div>
         {error && (
-          <div className="bt" style={{marginTop:16,fontSize:11,color:"#ff6666",letterSpacing:"0.15em"}}>
-            INVALID
-          </div>
+          <div className="bt" style={{marginTop:16,fontSize:11,color:"#ff6666",letterSpacing:"0.15em"}}>INVALID</div>
         )}
       </section>
     );
   }
 
-  // Filter responses by active sector
+  // DATA WRANGLING
   const filtered = activeSector === "ALL"
     ? responses
     : responses.filter(r => r.sector === activeSector);
 
-  // Sector counts for pie chart
   const sectorCounts = {};
-  responses.forEach(r => {
-    sectorCounts[r.sector] = (sectorCounts[r.sector] || 0) + 1;
-  });
+  responses.forEach(r => { sectorCounts[r.sector] = (sectorCounts[r.sector] || 0) + 1; });
   const total = responses.length;
 
-  // SVG pie chart
+  // Question completion rate per sector — how many of each sector's questions got answered on average
+  const completion = {};
+  SECTORS.forEach(s => {
+    const totalQs = s.hypotheses.reduce((a,h)=>a+h.questions.length,0);
+    const sectorResps = responses.filter(r=>r.sector===s.id);
+    if (sectorResps.length === 0) { completion[s.id] = 0; return; }
+    const answered = sectorResps.reduce((sum,r) => {
+      return sum + Object.values(r.answers).filter(v=>v && String(v).trim().length>0).length;
+    }, 0);
+    completion[s.id] = (answered / (sectorResps.length * totalQs)) * 100;
+  });
+
+  // Pie chart slices for distribution
   const pieColors = ["#ffffff","#aaaaaa","#666666","#333333"];
   let cumulative = 0;
   const slices = SECTORS.map((s,i) => {
@@ -1148,13 +956,13 @@ function ResultsPage() {
     const startAngle = cumulative * 2 * Math.PI;
     const endAngle = (cumulative + pct) * 2 * Math.PI;
     cumulative += pct;
-    const x1 = 100 + 80 * Math.sin(startAngle);
-    const y1 = 100 - 80 * Math.cos(startAngle);
-    const x2 = 100 + 80 * Math.sin(endAngle);
-    const y2 = 100 - 80 * Math.cos(endAngle);
+    const x1 = 80 + 64 * Math.sin(startAngle);
+    const y1 = 80 - 64 * Math.cos(startAngle);
+    const x2 = 80 + 64 * Math.sin(endAngle);
+    const y2 = 80 - 64 * Math.cos(endAngle);
     const largeArc = pct > 0.5 ? 1 : 0;
     return {
-      path: `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArc} 1 ${x2} ${y2} Z`,
+      path: `M 80 80 L ${x1} ${y1} A 64 64 0 ${largeArc} 1 ${x2} ${y2} Z`,
       color: pieColors[i % pieColors.length],
       label: s.short,
       count,
@@ -1162,63 +970,153 @@ function ResultsPage() {
     };
   }).filter(Boolean);
 
+  // Build a CSV for export
+  const buildCsv = () => {
+    const rows = [["id","timestamp","sector","question","answer"]];
+    responses.forEach(r => {
+      const sector = SECTORS.find(s=>s.id===r.sector);
+      if (!sector) return;
+      sector.hypotheses.forEach(h => {
+        h.questions.forEach(q => {
+          const ans = r.answers[q.id] || "";
+          rows.push([r.id, r.timestamp, sector.short, q.label, ans]);
+        });
+      });
+    });
+    return rows.map(row => row.map(cell =>
+      `"${String(cell).replace(/"/g,'""')}"`
+    ).join(",")).join("\n");
+  };
+
+  const downloadCsv = () => {
+    const csv = buildCsv();
+    const blob = new Blob([csv], {type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shape_science_responses_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const emailExport = () => {
+    const summary = [
+      `Shape Science — Weekly Digest`,
+      `Generated ${new Date().toLocaleString()}`,
+      ``,
+      `Total responses: ${total}`,
+      ``,
+      `By sector:`,
+      ...SECTORS.map(s => `  ${s.short}: ${sectorCounts[s.id]||0} (${total?((sectorCounts[s.id]||0)/total*100).toFixed(0):0}%)`),
+      ``,
+      `Completion rate:`,
+      ...SECTORS.map(s => `  ${s.short}: ${completion[s.id].toFixed(0)}%`),
+    ].join("\n");
+    const subject = encodeURIComponent("Shape Science — Responses Digest");
+    const body = encodeURIComponent(summary + "\n\n(Full CSV export downloaded separately)");
+    window.open(`mailto:${EMAIL_TARGET}?subject=${subject}&body=${body}`);
+  };
+
+  // UI
+  const toggleExpanded = (id) => setExpandedId(expandedId === id ? null : id);
+
   return (
-    <section style={{minHeight:"100vh",padding:"140px clamp(24px,8vw,120px) 80px"}}>
-      <div style={{display:"flex",alignItems:"flex-end",gap:16,marginBottom:16}}>
-        <span className="bt" style={{fontSize:13,letterSpacing:"0.2em",opacity:0.5,paddingBottom:6}}>06</span>
-        <h1 className="hl" style={{fontSize:"clamp(36px,7vw,72px)"}}>RESULTS</h1>
+    <section style={{minHeight:"100vh",padding:"120px clamp(24px,6vw,80px) 60px",maxWidth:1100,margin:"0 auto"}}>
+      {/* Header */}
+      <div style={{display:"flex",alignItems:"flex-end",gap:16,marginBottom:8}}>
+        <span className="bt" style={{fontSize:12,letterSpacing:"0.2em",opacity:0.5,paddingBottom:6}}>06</span>
+        <h1 className="hl" style={{fontSize:"clamp(32px,6vw,60px)"}}>RESULTS</h1>
       </div>
-      <p className="bt" style={{fontSize:13,letterSpacing:"0.15em",opacity:0.45,marginBottom:60}}>
-        {total} response{total !== 1 ? "s" : ""} collected
+      <p className="bt" style={{fontSize:12,letterSpacing:"0.15em",opacity:0.45,marginBottom:32}}>
+        {total} response{total !== 1 ? "s" : ""} · {new Date().toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})}
       </p>
 
       {total === 0 ? (
         <div className="bt" style={{fontSize:14,opacity:0.4,padding:"60px 0",letterSpacing:"0.05em"}}>
-          No responses yet. When manufacturers complete the questionnaire, results will appear here.
+          No responses yet. When manufacturers complete the questionnaire on this device, results will appear here.
         </div>
       ) : (
         <>
-          {/* Distribution + Pie Chart */}
+          {/* TOP ROW — Distribution pie + Completion bars side-by-side */}
           <div style={{
-            display:"grid",gridTemplateColumns:"220px 1fr",gap:48,
-            marginBottom:80,alignItems:"center",
-          }}>
-            <svg viewBox="0 0 200 200" style={{width:200,height:200}}>
-              {slices.map((s,i)=>(
-                <path key={i} d={s.path} fill={s.color} stroke="#000" strokeWidth="1"/>
-              ))}
-            </svg>
-            <div>
-              <div className="bt" style={{fontSize:10,letterSpacing:"0.3em",opacity:0.4,marginBottom:16}}>
-                DISTRIBUTION BY SECTOR
+            display:"grid",gridTemplateColumns:"1fr 1fr",gap:40,marginBottom:48,
+          }} className="stats-grid">
+            {/* Distribution pie */}
+            <div style={{border:"1px solid rgba(255,255,255,0.08)",padding:24,borderRadius:2}}>
+              <div className="bt" style={{fontSize:10,letterSpacing:"0.28em",opacity:0.5,marginBottom:18}}>
+                DISTRIBUTION
               </div>
-              {slices.map((s,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
-                  <div style={{width:14,height:14,background:s.color,border:"1px solid rgba(255,255,255,0.2)"}}/>
-                  <div className="bt" style={{fontSize:13,opacity:0.85,minWidth:200,letterSpacing:"0.02em"}}>
-                    {s.label}
+              <div style={{display:"flex",alignItems:"center",gap:20}}>
+                <svg viewBox="0 0 160 160" style={{width:140,height:140,flexShrink:0}}>
+                  {slices.map((s,i)=>(
+                    <path key={i} d={s.path} fill={s.color} stroke="#000" strokeWidth="1.5"/>
+                  ))}
+                </svg>
+                <div style={{flex:1,minWidth:0}}>
+                  {slices.map((s,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                      <div style={{width:10,height:10,background:s.color,flexShrink:0,border:"1px solid rgba(255,255,255,0.15)"}}/>
+                      <div className="bt" style={{fontSize:11,opacity:0.85,flex:1,letterSpacing:"0.02em",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                        {s.label}
+                      </div>
+                      <div className="bt" style={{fontSize:11,opacity:0.55,flexShrink:0}}>
+                        {s.count} · {(s.pct*100).toFixed(0)}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Completion rate bars */}
+            <div style={{border:"1px solid rgba(255,255,255,0.08)",padding:24,borderRadius:2}}>
+              <div className="bt" style={{fontSize:10,letterSpacing:"0.28em",opacity:0.5,marginBottom:18}}>
+                COMPLETION RATE
+              </div>
+              {SECTORS.map(s => (
+                <div key={s.id} style={{marginBottom:14}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
+                    <div className="bt" style={{fontSize:11,opacity:0.85,letterSpacing:"0.02em"}}>{s.short}</div>
+                    <div className="bt" style={{fontSize:10,opacity:0.55}}>{completion[s.id].toFixed(0)}%</div>
                   </div>
-                  <div className="bt" style={{fontSize:13,opacity:0.5}}>
-                    {s.count} ({(s.pct*100).toFixed(0)}%)
+                  <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:1,overflow:"hidden"}}>
+                    <div style={{
+                      width:`${completion[s.id]}%`,height:"100%",background:"#fff",
+                      transition:"width 0.6s cubic-bezier(0.16,1,0.3,1)",
+                    }}/>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Sector toggle */}
-          <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:48,
-            paddingBottom:24,borderBottom:"1px solid rgba(255,255,255,0.08)",
+          {/* Action row — export */}
+          <div style={{
+            display:"flex",gap:8,marginBottom:32,flexWrap:"wrap",
           }}>
-            {[{id:"ALL",label:"ALL"},...SECTORS.map(s=>({id:s.id,label:s.short.toUpperCase()}))].map(t=>(
+            <div onClick={downloadCsv} className="bt" style={{
+              padding:"8px 18px",border:"1px solid rgba(255,255,255,0.25)",
+              fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",cursor:"none",
+            }}>Download CSV</div>
+            <div onClick={emailExport} className="bt" style={{
+              padding:"8px 18px",border:"1px solid rgba(255,255,255,0.25)",
+              fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",cursor:"none",
+            }}>Email digest to me</div>
+          </div>
+
+          {/* Sector toggle */}
+          <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:24,
+            paddingBottom:20,borderBottom:"1px solid rgba(255,255,255,0.08)",
+          }}>
+            {[{id:"ALL",label:`ALL (${total})`},...SECTORS.map(s=>({id:s.id,label:`${s.short.toUpperCase()} (${sectorCounts[s.id]||0})`}))].map(t=>(
               <div
                 key={t.id}
                 onClick={()=>setActiveSector(t.id)}
                 className="bt"
                 style={{
-                  padding:"8px 18px",
+                  padding:"6px 12px",
                   border: activeSector===t.id ? "1px solid #fff" : "1px solid rgba(255,255,255,0.15)",
-                  fontSize:11,letterSpacing:"0.18em",cursor:"none",
+                  fontSize:10,letterSpacing:"0.15em",cursor:"none",
                   background: activeSector===t.id ? "rgba(255,255,255,0.08)" : "transparent",
                   opacity: activeSector===t.id ? 1 : 0.6,
                   transition:"all 0.3s",
@@ -1229,62 +1127,96 @@ function ResultsPage() {
             ))}
           </div>
 
-          {/* Responses */}
+          {/* Responses — collapsed by default, click to expand */}
+          <div className="bt" style={{fontSize:10,letterSpacing:"0.28em",opacity:0.5,marginBottom:14}}>
+            RESPONSES {activeSector !== "ALL" ? `· ${SECTORS.find(s=>s.id===activeSector)?.short}` : ""}
+          </div>
+
           {filtered.length === 0 ? (
-            <div className="bt" style={{fontSize:13,opacity:0.4,padding:"40px 0"}}>
+            <div className="bt" style={{fontSize:12,opacity:0.4,padding:"20px 0"}}>
               No responses in this sector yet.
             </div>
           ) : (
-            filtered.map((response, idx) => {
-              const sector = SECTORS.find(s => s.id === response.sector);
-              if (!sector) return null;
-              return (
-                <div key={response.id} style={{
-                  marginBottom:60,paddingBottom:48,
-                  borderBottom:"1px solid rgba(255,255,255,0.06)",
-                }}>
-                  <div className="bt" style={{
-                    fontSize:10,letterSpacing:"0.3em",opacity:0.4,marginBottom:6,
+            <div>
+              {filtered.map((response, idx) => {
+                const sector = SECTORS.find(s => s.id === response.sector);
+                if (!sector) return null;
+                const isOpen = expandedId === response.id;
+                const date = new Date(response.timestamp);
+                const preview = Object.values(response.answers).find(v=>v && String(v).trim().length>0) || "";
+                return (
+                  <div key={response.id} style={{
+                    borderBottom:"1px solid rgba(255,255,255,0.06)",
                   }}>
-                    RESPONSE {String(idx+1).padStart(3,"0")} · {new Date(response.timestamp).toLocaleDateString()} {new Date(response.timestamp).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
-                  </div>
-                  <div className="hl" style={{fontSize:18,marginBottom:24,letterSpacing:"-0.005em"}}>
-                    {sector.label}
-                  </div>
-                  {sector.hypotheses.map(h => (
-                    <div key={h.id} style={{marginBottom:24}}>
-                      <div className="bt" style={{
-                        fontSize:11,letterSpacing:"0.15em",opacity:0.5,marginBottom:14,
-                        textTransform:"uppercase",
-                      }}>
-                        {h.statement}
+                    <div
+                      onClick={()=>toggleExpanded(response.id)}
+                      style={{
+                        display:"flex",alignItems:"center",gap:16,padding:"14px 0",cursor:"none",
+                      }}
+                    >
+                      <div className="bt" style={{fontSize:10,opacity:0.4,letterSpacing:"0.15em",width:36,flexShrink:0}}>
+                        {String(idx+1).padStart(3,"0")}
                       </div>
-                      {h.questions.map(q => {
-                        const answer = response.answers[q.id];
-                        if (!answer) return null;
-                        return (
-                          <div key={q.id} style={{marginBottom:14,maxWidth:820}}>
-                            <div className="bt" style={{fontSize:12,opacity:0.45,marginBottom:4,lineHeight:1.4}}>
-                              {q.label}
-                            </div>
-                            <div className="bt" style={{
-                              fontSize:14,opacity:0.9,lineHeight:1.55,
-                              paddingLeft:12,borderLeft:"1px solid rgba(255,255,255,0.15)",
-                            }}>
-                              {answer}
-                            </div>
-                          </div>
-                        );
-                      })}
+                      <div className="bt" style={{fontSize:11,opacity:0.85,width:160,flexShrink:0,letterSpacing:"0.02em"}}>
+                        {sector.short}
+                      </div>
+                      <div className="bt" style={{fontSize:11,opacity:0.5,width:90,flexShrink:0}}>
+                        {date.toLocaleDateString(undefined,{month:"short",day:"numeric"})}
+                      </div>
+                      <div className="bt" style={{
+                        fontSize:11,opacity:0.55,flex:1,minWidth:0,
+                        overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+                        fontStyle: preview ? "normal" : "italic",
+                      }}>
+                        {preview ? `"${String(preview).slice(0,90)}${String(preview).length>90?"…":""}"` : "(empty)"}
+                      </div>
+                      <div className="bt" style={{fontSize:10,opacity:0.5,flexShrink:0,letterSpacing:"0.1em"}}>
+                        {isOpen ? "▲" : "▼"}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              );
-            })
+                    {isOpen && (
+                      <div style={{padding:"8px 0 28px 52px"}}>
+                        {sector.hypotheses.map(h => {
+                          const answered = h.questions.filter(q=>{
+                            const a = response.answers[q.id];
+                            return a && String(a).trim().length>0;
+                          });
+                          if (answered.length === 0) return null;
+                          return (
+                            <div key={h.id} style={{marginBottom:18}}>
+                              <div className="bt" style={{
+                                fontSize:10,letterSpacing:"0.18em",opacity:0.45,marginBottom:10,
+                                textTransform:"uppercase",
+                              }}>
+                                {h.statement}
+                              </div>
+                              {answered.map(q => (
+                                <div key={q.id} style={{marginBottom:10,maxWidth:800}}>
+                                  <div className="bt" style={{fontSize:11,opacity:0.4,marginBottom:3,lineHeight:1.4}}>
+                                    {q.label}
+                                  </div>
+                                  <div className="bt" style={{
+                                    fontSize:12.5,opacity:0.9,lineHeight:1.5,
+                                    paddingLeft:10,borderLeft:"1px solid rgba(255,255,255,0.15)",
+                                  }}>
+                                    {response.answers[q.id]}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </>
       )}
-      <div style={{marginTop:60}}><Footer/></div>
+      <style>{`@media(max-width:760px){.stats-grid{grid-template-columns:1fr!important}}`}</style>
+      <div style={{marginTop:40}}><Footer/></div>
     </section>
   );
 }
@@ -1397,7 +1329,6 @@ export default function App() {
     <>
       <style>{globalCSS}</style>
       <Cursor/>
-      <FilmGrain/>
       <ScrollProgress/>
       <Nav page={page} setPage={navigate}/>
       <main style={{
