@@ -259,46 +259,75 @@ function HeroTitle() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // MOBILE: fills the entire viewport (100vw × 100vh).
-  // Three stacked SVG rows, each stretched edge-to-edge with preserveAspectRatio="none".
-  // Different row heights give different vertical weights per word — SHAPE is chunky
-  // and tall, SCIENCE gets horizontally stretched (wider aspect), 2026 sits between.
-  // The heights sum to 100% of the viewport. No padding, no margins.
+  // MOBILE: three stacked words fill the screen exactly.
   //
-  // To guarantee no letter is ever cut off, each SVG uses a generous internal
-  // viewBox with the text y-positioned via the actual cap-height calculation,
-  // and `preserveAspectRatio="none"` handles the stretching.
+  // Layout strategy:
+  //   - Outer container fills 100dvw × 100dvh with safe padding around the
+  //     outside (top reserved for nav logo/menu, sides and bottom give breathing
+  //     room so no glyph ever touches an edge).
+  //   - Inner block is a flex column — each row gets a DIFFERENT rowPct so
+  //     the three words have visibly different heights (deliberately warped).
+  //   - Each word is its own SVG with preserveAspectRatio="none" so the glyphs
+  //     stretch exactly to the row's width AND height. This is what makes SHORT
+  //     rows look "squashed" and TALL rows look "heavy" — same word scaled to
+  //     different aspect ratios.
+  //   - textLength with lengthAdjust="spacingAndGlyphs" forces width-stretch
+  //     without cutting letters off. The viewBox Y position is chosen to leave
+  //     space for descenders and avoid cropping.
+  //
+  // Height proportions (summing to 100): SHAPE 25, SCIENCE 50, 2026 25.
+  // This makes SCIENCE literally twice as tall as the other two, as requested.
   if (isMobile) {
     const lines = [
-      // rowPct is the % of viewport height each row occupies (must sum to 100)
-      // vbWidth/vbHeight define the internal SVG coordinate space used by the glyphs
-      { text: "SHAPE",   rowPct: 42, vbW: 500, vbH: 420 },
-      { text: "SCIENCE", rowPct: 30, vbW: 700, vbH: 200 },
-      { text: "2026",    rowPct: 28, vbW: 400, vbH: 240 },
+      // rowPct: share of inner column height
+      // vbW/vbH:  SVG internal coord space. The RATIO vbW/vbH controls the glyph
+      //           aspect — higher ratio = narrower, taller glyphs; lower = wider,
+      //           squatter. We match each row's real aspect roughly to its vbW/vbH
+      //           so letters remain legible while being deliberately warped.
+      { text: "SHAPE",   rowPct: 25, vbW: 500, vbH: 260 },
+      { text: "SCIENCE", rowPct: 50, vbW: 700, vbH: 380 },
+      { text: "2026",    rowPct: 25, vbW: 400, vbH: 260 },
     ];
     return (
       <div className="hl" style={{
-        position:"fixed",top:0,left:0,width:"100vw",height:"100vh",height:"100dvh",
-        display:"flex",flexDirection:"column",zIndex:0,background:"#000",
+        // Fill the parent (which is the hero section minus nav padding).
+        width:"100%",
+        flex:"1 1 auto",
+        minHeight:0,
+        boxSizing:"border-box",
+        padding:"0 16px 16px",
+        display:"flex",
+        flexDirection:"column",
+        justifyContent:"stretch",
       }}>
         {lines.map((line,i) => (
-          <div key={i} style={{flex:`${line.rowPct} ${line.rowPct} 0`,minHeight:0,overflow:"hidden"}}>
+          <div key={i} style={{
+            flex:`${line.rowPct} ${line.rowPct} 0`,
+            minHeight:0,
+            display:"flex",
+            alignItems:"center",
+            justifyContent:"center",
+          }}>
             <svg
               viewBox={`0 0 ${line.vbW} ${line.vbH}`}
               preserveAspectRatio="none"
-              style={{width:"100%",height:"100%",display:"block"}}
+              style={{width:"100%",height:"100%",display:"block",overflow:"visible"}}
             >
               <text
                 x={line.vbW/2}
-                y={line.vbH * 0.82}
+                // y positioned so cap-height sits inside the row with ~8% top
+                // and ~12% bottom (leaves room for glyph descenders)
+                y={line.vbH * 0.88}
                 textAnchor="middle"
-                fontSize={line.vbH * 0.95}
+                // font-size = 92% of vbH so glyphs fit comfortably within the row
+                fontSize={line.vbH * 0.92}
                 fontFamily="'Oswald', sans-serif"
                 fontWeight="700"
                 fill="#fff"
-                textLength={line.vbW * 0.98}
+                // textLength = 96% of vbW so letters don't touch left/right edges
+                textLength={line.vbW * 0.96}
                 lengthAdjust="spacingAndGlyphs"
-                style={{letterSpacing:"-0.02em"}}
+                style={{letterSpacing:"-0.01em"}}
               >
                 {line.text}
               </text>
@@ -350,12 +379,16 @@ function HomePage({ setPage }) {
   return (
     <div>
       <section style={{
-        height:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",
+        height:"100dvh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",
         position:"relative",overflow:"hidden",
       }}>
         <div style={{position:"absolute",inset:0,background:"#000"}}/>
         <div style={{
           position:"relative",zIndex:1,textAlign:"center",
+          width:"100%",height:"100%",
+          display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",
+          paddingTop:72,  // reserve space for nav above the hero on mobile
+          boxSizing:"border-box",
           opacity:visible?1:0,transform:visible?"translateY(0)":"translateY(40px)",
           transition:"all 1.2s cubic-bezier(0.16,1,0.3,1)",
         }}>
