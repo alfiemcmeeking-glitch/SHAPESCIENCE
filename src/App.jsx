@@ -251,6 +251,65 @@ function Nav({ page, setPage }) {
 
 /* ─── HERO TITLE — Gabriel Moses style: all inline on one line, baseline aligned ─── */
 function HeroTitle() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // MOBILE: fills the entire viewport (100vw × 100vh).
+  // Three stacked SVG rows, each stretched edge-to-edge with preserveAspectRatio="none".
+  // Different row heights give different vertical weights per word — SHAPE is chunky
+  // and tall, SCIENCE gets horizontally stretched (wider aspect), 2026 sits between.
+  // The heights sum to 100% of the viewport. No padding, no margins.
+  //
+  // To guarantee no letter is ever cut off, each SVG uses a generous internal
+  // viewBox with the text y-positioned via the actual cap-height calculation,
+  // and `preserveAspectRatio="none"` handles the stretching.
+  if (isMobile) {
+    const lines = [
+      // rowPct is the % of viewport height each row occupies (must sum to 100)
+      // vbWidth/vbHeight define the internal SVG coordinate space used by the glyphs
+      { text: "SHAPE",   rowPct: 42, vbW: 500, vbH: 420 },
+      { text: "SCIENCE", rowPct: 30, vbW: 700, vbH: 200 },
+      { text: "2026",    rowPct: 28, vbW: 400, vbH: 240 },
+    ];
+    return (
+      <div className="hl" style={{
+        position:"fixed",top:0,left:0,width:"100vw",height:"100vh",height:"100dvh",
+        display:"flex",flexDirection:"column",zIndex:0,background:"#000",
+      }}>
+        {lines.map((line,i) => (
+          <div key={i} style={{flex:`${line.rowPct} ${line.rowPct} 0`,minHeight:0,overflow:"hidden"}}>
+            <svg
+              viewBox={`0 0 ${line.vbW} ${line.vbH}`}
+              preserveAspectRatio="none"
+              style={{width:"100%",height:"100%",display:"block"}}
+            >
+              <text
+                x={line.vbW/2}
+                y={line.vbH * 0.82}
+                textAnchor="middle"
+                fontSize={line.vbH * 0.95}
+                fontFamily="'Oswald', sans-serif"
+                fontWeight="700"
+                fill="#fff"
+                textLength={line.vbW * 0.98}
+                lengthAdjust="spacingAndGlyphs"
+                style={{letterSpacing:"-0.02em"}}
+              >
+                {line.text}
+              </text>
+            </svg>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // DESKTOP: original single-line layout, unchanged.
   return (
     <div className="hl" style={{
       display:"flex",
@@ -263,9 +322,7 @@ function HeroTitle() {
       fontWeight:700,
       letterSpacing:"-0.02em",
     }}>
-      <span style={{
-        fontSize:"clamp(38px,11vw,150px)",
-      }}>
+      <span style={{fontSize:"clamp(38px,11vw,150px)"}}>
         SHAPE SCIENCE
       </span>
       <span style={{
