@@ -382,7 +382,28 @@ function HomePage({ setPage }) {
         height:"100dvh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",
         position:"relative",overflow:"hidden",
       }}>
-        <div style={{position:"absolute",inset:0,background:"#000"}}/>
+        {/* Background video — fullscreen, auto-loop, muted, no controls */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            position:"absolute",inset:0,width:"100%",height:"100%",
+            objectFit:"cover",zIndex:0,
+            filter:"grayscale(100%) contrast(1.1)",
+          }}
+        >
+          <source src="/assets/hero-bg.mp4" type="video/mp4" />
+        </video>
+        {/* Dark overlay so text remains readable */}
+        <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.45)",zIndex:0}}/>
+        {/* Fade to black at the bottom — smooth gradient */}
+        <div style={{
+          position:"absolute",bottom:0,left:0,right:0,height:"35%",
+          background:"linear-gradient(to bottom, transparent, #000)",
+          zIndex:0,pointerEvents:"none",
+        }}/>
         <div style={{
           position:"relative",zIndex:1,textAlign:"center",
           width:"100%",height:"100%",
@@ -1431,3 +1452,4 @@ export default function App() {
     </>
   );
 }
+
