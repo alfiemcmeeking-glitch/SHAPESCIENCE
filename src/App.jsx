@@ -279,55 +279,44 @@ function HeroTitle() {
   // This makes SCIENCE literally twice as tall as the other two, as requested.
   if (isMobile) {
     const lines = [
-      // rowPct: share of inner column height
-      // vbW/vbH:  SVG internal coord space. The RATIO vbW/vbH controls the glyph
-      //           aspect — higher ratio = narrower, taller glyphs; lower = wider,
-      //           squatter. We match each row's real aspect roughly to its vbW/vbH
-      //           so letters remain legible while being deliberately warped.
-      { text: "SHAPE",   rowPct: 25, vbW: 500, vbH: 260 },
-      { text: "SCIENCE", rowPct: 50, vbW: 700, vbH: 380 },
-      { text: "2026",    rowPct: 25, vbW: 400, vbH: 260 },
+      { text: "SHAPE",   flex: 20, vbW: 340 },
+      { text: "SCIENCE", flex: 60, vbW: 460 },
+      { text: "2026",    flex: 20, vbW: 260 },
     ];
+    // viewBox: y starts at 14 (clips space above caps), height is 55 (clips below baseline)
+    // This removes the dead space SVG reserves for ascenders/descenders
+    const vbY = 8;
+    const vbH = 63;
     return (
       <div className="hl" style={{
-        // Fill the parent (which is the hero section minus nav padding).
         width:"100%",
         flex:"1 1 auto",
         minHeight:0,
         boxSizing:"border-box",
-        padding:"0 16px 16px",
+        padding:0,
         display:"flex",
         flexDirection:"column",
-        justifyContent:"stretch",
       }}>
         {lines.map((line,i) => (
           <div key={i} style={{
-            flex:`${line.rowPct} ${line.rowPct} 0`,
+            flex:`${line.flex} 1 0`,
             minHeight:0,
-            display:"flex",
-            alignItems:"center",
-            justifyContent:"center",
           }}>
             <svg
-              viewBox={`0 0 ${line.vbW} ${line.vbH}`}
+              viewBox={`0 ${vbY} ${line.vbW} ${vbH}`}
               preserveAspectRatio="none"
-              style={{width:"100%",height:"100%",display:"block",overflow:"visible"}}
+              style={{width:"100%",height:"100%",display:"block"}}
             >
               <text
-                x={line.vbW/2}
-                // y positioned so cap-height sits inside the row with ~8% top
-                // and ~12% bottom (leaves room for glyph descenders)
-                y={line.vbH * 0.88}
+                x="50%"
+                y="68"
                 textAnchor="middle"
-                // font-size = 92% of vbH so glyphs fit comfortably within the row
-                fontSize={line.vbH * 0.92}
+                fontSize="72"
                 fontFamily="'Oswald', sans-serif"
                 fontWeight="700"
                 fill="#fff"
-                // textLength = 96% of vbW so letters don't touch left/right edges
                 textLength={line.vbW * 0.96}
                 lengthAdjust="spacingAndGlyphs"
-                style={{letterSpacing:"-0.01em"}}
               >
                 {line.text}
               </text>
@@ -384,10 +373,22 @@ function HomePage({ setPage }) {
       }}>
         {/* Background video — fullscreen, auto-loop, muted, no controls */}
         <video
+          ref={el => {
+            if (el) {
+              el.setAttribute("muted", "");
+              el.setAttribute("playsinline", "");
+              el.setAttribute("webkit-playsinline", "");
+              el.muted = true;
+              el.play().catch(() => {});
+            }
+          }}
           autoPlay
           loop
           muted
           playsInline
+          webkit-playsinline=""
+          disablePictureInPicture
+          controlsList="nofullscreen nodownload noremoteplayback"
           style={{
             position:"absolute",inset:0,width:"100%",height:"100%",
             objectFit:"cover",zIndex:0,
@@ -1452,4 +1453,6 @@ export default function App() {
     </>
   );
 }
+
+
 
