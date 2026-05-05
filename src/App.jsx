@@ -981,15 +981,6 @@ function ResultsPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [pw, setPw] = useState("");
   const [error, setError] = useState(false);
-  const [activeSector, setActiveSector] = useState("ALL");
-  const [responses, setResponses] = useState([]);
-  const [expandedId, setExpandedId] = useState(null);
-
-  useEffect(() => {
-    if (unlocked) {
-      setResponses(loadResponses());
-    }
-  }, [unlocked]);
 
   const tryUnlock = () => {
     if (pw.toUpperCase() === "SHAPE") {
@@ -1037,100 +1028,128 @@ function ResultsPage() {
     );
   }
 
-  // DATA WRANGLING
-  const filtered = activeSector === "ALL"
-    ? responses
-    : responses.filter(r => r.sector === activeSector);
+  /* ── HARDCODED INSIGHTS DATA ── */
+  const INSIGHT_THEMES = [
+    {
+      id: "manufacturing_route",
+      theme: "MANUFACTURING ROUTE",
+      tagline: "How should the scaffold be produced at scale?",
+      frequency: 6, // how many respondents touched on this
+      insights: [
+        { text: "3D printing works for initial prototyping but injection moulding is essential for mass-scale production volumes.", sources: ["Zellerfeld"], tag: "RECURRING" },
+        { text: "3D printing cost per unit is not competitive at the volumes shoe manufacturers need (MOQ 3,000+ per size at large factories).", sources: ["Zellerfeld", "XTL", "Sumtop"], tag: "RECURRING" },
+        { text: "Custom 3D printing per customer could be viable for personalised applications like orthopaedic insoles, but this is application-dependent.", sources: ["Zellerfeld"], tag: "OPPORTUNITY" },
+        { text: "Zellerfeld aims to become a general 3D printing company beyond footwear — future collaboration feasible once they expand.", sources: ["Zellerfeld"], tag: "FUTURE" },
+      ],
+    },
+    {
+      id: "supply_chain_fit",
+      theme: "SUPPLY CHAIN INTEGRATION",
+      tagline: "Can the material fit existing production lines?",
+      frequency: 5,
+      insights: [
+        { text: "Material must be die-cuttable with existing equipment. Any change to the production line will face strong resistance.", sources: ["XTL", "Sumtop", "Medium Factory HCMC"], tag: "RECURRING" },
+        { text: "Flat sheets and rolls up to 6mm thickness are the accepted formats. Wet or damp substrates are problematic for current workflows.", sources: ["Medium Factory HCMC"], tag: "CONSTRAINT" },
+        { text: "Large factories import materials from China and produce in Vietnam. They are open to new materials as long as they perform and the brand approves.", sources: ["XTL", "Sumtop"], tag: "RECURRING" },
+        { text: "Material decisions at large factories are entirely brand-driven. The factory processes whatever the brand\u2019s approved materials list specifies.", sources: ["XTL", "Sumtop"], tag: "RECURRING" },
+        { text: "For a new supplier, brands require factory audit, full data sheet, and physical test reports against internal standards. Approval takes 3\u20136 months.", sources: ["XTL", "Sumtop"], tag: "BARRIER" },
+      ],
+    },
+    {
+      id: "scale_entry",
+      theme: "SCALE & ENTRY POINT",
+      tagline: "Where should the material enter the market first?",
+      frequency: 5,
+      insights: [
+        { text: "Medium-scale factories (MOQ ~200 units) are the realistic initial customers. Lower barriers, practical testing approach, owner makes decisions directly.", sources: ["Medium Factory HCMC"], tag: "RECURRING" },
+        { text: "Large-scale factories (MOQ 3,000+ per size) are a longer-term target once the material is proven at smaller volumes.", sources: ["XTL", "Sumtop"], tag: "RECURRING" },
+        { text: "Limited-edition and innovation capsule lines are the natural entry point at brand level — they absorb 20\u201330% retail premiums.", sources: ["Zellerfeld", "XTL", "Sumtop"], tag: "RECURRING" },
+        { text: "Brands historically accept 5\u201315% material cost premium for sustainability, depending on product tier.", sources: ["Zellerfeld", "XTL", "Sumtop"], tag: "DATA POINT" },
+      ],
+    },
+    {
+      id: "monomaterial",
+      theme: "MONOMATERIAL ADVANTAGE",
+      tagline: "Can a single material replace multi-layer construction?",
+      frequency: 4,
+      insights: [
+        { text: "Typical shoe uppers have 3\u20134 bonded layers. Adhesive application and drying accounts for 20\u201325% of total production time.", sources: ["Medium Factory HCMC"], tag: "DATA POINT" },
+        { text: "Adhesive failure and delamination cause 5\u20138% reject rates. In hot, humid conditions the failure rate increases.", sources: ["Medium Factory HCMC"], tag: "PAIN POINT" },
+        { text: "A single material replacing outer, reinforcement, and padding layers would dramatically simplify production — if it is die-cuttable, holds shape, and is skin-comfortable.", sources: ["Medium Factory HCMC", "XTL"], tag: "OPPORTUNITY" },
+        { text: "Variable-density midsoles without multi-piece construction would reduce bill of materials, labour, and assembly time at large factories.", sources: ["XTL", "Sumtop"], tag: "OPPORTUNITY" },
+      ],
+    },
+    {
+      id: "cellulose_production",
+      theme: "CELLULOSE PRODUCTION AT SCALE",
+      tagline: "Can the raw material be produced affordably?",
+      frequency: 3,
+      insights: [
+        { text: "Ben Tre facilities produce bacterial cellulose sheets at scale using methods very close to Shape Science\u2019s lab process. Scalability is confirmed.", sources: ["Ben Tre Facilities"], tag: "VALIDATED" },
+        { text: "Contamination is the biggest issue at growth facilities (~8% tray reject rate). Temperature fluctuations cause thickness inconsistency.", sources: ["Ben Tre Facilities"], tag: "CHALLENGE" },
+        { text: "Porosity is controlled through growth time and sugar concentration. Current tolerances are loose (\u00b115%) — tighter control needs environmental investment.", sources: ["Ben Tre Facilities", "HNB Bio"], tag: "CONSTRAINT" },
+        { text: "10\u201312% of finished cellulose sheets are rejected at QC for thickness inconsistency, holes, or uneven moisture.", sources: ["HNB Bio"], tag: "DATA POINT" },
+        { text: "Scaffold must be biocompatible with bacterial culture and not inhibit cellulose growth. If compatible, growth facilities are open to trialling.", sources: ["Ben Tre Facilities"], tag: "REQUIREMENT" },
+      ],
+    },
+    {
+      id: "sustainability",
+      theme: "SUSTAINABILITY & END-OF-LIFE",
+      tagline: "How important is biodegradability vs recyclability?",
+      frequency: 4,
+      insights: [
+        { text: "Biodegradability is a strong differentiator provided durability during use is not compromised. Inability to mechanically recycle is not a dealbreaker.", sources: ["Zellerfeld"], tag: "INSIGHT" },
+        { text: "EU EPR legislation is expected to tighten material requirements within 2\u20133 years. Multiple factories flagged this as incoming.", sources: ["XTL", "Sumtop", "Zellerfeld"], tag: "RECURRING" },
+        { text: "Brands require cradle-to-gate LCA to ISO 14044 with carbon footprint in kg CO\u2082e per functional unit at minimum.", sources: ["Zellerfeld", "XTL"], tag: "REQUIREMENT" },
+        { text: "A verified 50%+ reduction in embodied carbon justifies 10\u201312% material cost premium for innovation lines.", sources: ["Zellerfeld"], tag: "DATA POINT" },
+      ],
+    },
+    {
+      id: "cosmetics_application",
+      theme: "COSMETIC FACEMASK APPLICATION",
+      tagline: "Can scaffolds improve cellulose sheet masks?",
+      frequency: 2,
+      insights: [
+        { text: "Mask adherence to facial contours and active ingredient delivery are the two performance metrics cosmetic brands care most about.", sources: ["HNB Bio"], tag: "INSIGHT" },
+        { text: "If scaffold demonstrably improves adherence and delivery, cosmetic brand clients would be very interested. Validation takes 3\u20134 months.", sources: ["HNB Bio"], tag: "OPPORTUNITY" },
+        { text: "ASEAN market regulatory approval is straightforward. EU/US pathway is handled by the brand directly.", sources: ["HNB Bio"], tag: "INSIGHT" },
+      ],
+    },
+  ];
 
-  const sectorCounts = {};
-  responses.forEach(r => { sectorCounts[r.sector] = (sectorCounts[r.sector] || 0) + 1; });
-  const total = responses.length;
+  const RESPONDENTS = [
+    { name: "Zellerfeld", location: "Hamburg, Germany", type: "3D Printing Factory", scale: "World\u2019s largest 3D printed shoe factory" },
+    { name: "XTL (Xingtailai)", location: "Hanoi, Vietnam", type: "Large-Scale Footwear", scale: "MOQ ~3,000/size \u00b7 Nike, Prada, New Balance, Under Armour, Vans" },
+    { name: "Sumtop Footwear Vietnam", location: "Hanoi, Vietnam", type: "Large-Scale Footwear", scale: "MOQ ~3,000/size \u00b7 Major global brands" },
+    { name: "Medium-Scale Factory", location: "HCMC Region, Vietnam", type: "Medium Footwear", scale: "MOQ ~200 units" },
+    { name: "HNB Bio Cellulose", location: "Ho Chi Minh City, Vietnam", type: "Cellulose Processing", scale: "End-product manufacturing from BC sheets" },
+    { name: "Ben Tre Growth Facilities", location: "Ben Tre, Vietnam", type: "Cellulose Growth", scale: "3 raw material growth sites" },
+  ];
 
-  // Question completion rate per sector — how many of each sector's questions got answered on average
-  const completion = {};
-  SECTORS.forEach(s => {
-    const totalQs = s.hypotheses.reduce((a,h)=>a+h.questions.length,0);
-    const sectorResps = responses.filter(r=>r.sector===s.id);
-    if (sectorResps.length === 0) { completion[s.id] = 0; return; }
-    const answered = sectorResps.reduce((sum,r) => {
-      return sum + Object.values(r.answers).filter(v=>v && String(v).trim().length>0).length;
-    }, 0);
-    completion[s.id] = (answered / (sectorResps.length * totalQs)) * 100;
-  });
+  const [activeTheme, setActiveTheme] = useState("ALL");
+  const [expandedTheme, setExpandedTheme] = useState(null);
 
-  // Pie chart slices for distribution
-  const pieColors = ["#ffffff","#aaaaaa","#666666","#333333"];
-  let cumulative = 0;
-  const slices = SECTORS.map((s,i) => {
-    const count = sectorCounts[s.id] || 0;
-    if (count === 0) return null;
-    const pct = count / total;
-    const startAngle = cumulative * 2 * Math.PI;
-    const endAngle = (cumulative + pct) * 2 * Math.PI;
-    cumulative += pct;
-    const x1 = 80 + 64 * Math.sin(startAngle);
-    const y1 = 80 - 64 * Math.cos(startAngle);
-    const x2 = 80 + 64 * Math.sin(endAngle);
-    const y2 = 80 - 64 * Math.cos(endAngle);
-    const largeArc = pct > 0.5 ? 1 : 0;
-    return {
-      path: `M 80 80 L ${x1} ${y1} A 64 64 0 ${largeArc} 1 ${x2} ${y2} Z`,
-      color: pieColors[i % pieColors.length],
-      label: s.short,
-      count,
-      pct,
-    };
-  }).filter(Boolean);
-
-  // Build a CSV for export
-  const buildCsv = () => {
-    const rows = [["id","timestamp","sector","question","answer"]];
-    responses.forEach(r => {
-      const sector = SECTORS.find(s=>s.id===r.sector);
-      if (!sector) return;
-      sector.hypotheses.forEach(h => {
-        h.questions.forEach(q => {
-          const ans = r.answers[q.id] || "";
-          rows.push([r.id, r.timestamp, sector.short, q.label, ans]);
-        });
-      });
-    });
-    return rows.map(row => row.map(cell =>
-      `"${String(cell).replace(/"/g,'""')}"`
-    ).join(",")).join("\n");
+  const tagColors = {
+    "RECURRING": { bg: "rgba(255,255,255,0.12)", border: "rgba(255,255,255,0.35)" },
+    "VALIDATED": { bg: "rgba(80,200,120,0.15)", border: "rgba(80,200,120,0.4)" },
+    "OPPORTUNITY": { bg: "rgba(100,180,255,0.12)", border: "rgba(100,180,255,0.35)" },
+    "DATA POINT": { bg: "rgba(255,200,60,0.12)", border: "rgba(255,200,60,0.35)" },
+    "PAIN POINT": { bg: "rgba(255,100,100,0.12)", border: "rgba(255,100,100,0.3)" },
+    "CHALLENGE": { bg: "rgba(255,150,50,0.12)", border: "rgba(255,150,50,0.3)" },
+    "CONSTRAINT": { bg: "rgba(200,150,255,0.12)", border: "rgba(200,150,255,0.3)" },
+    "BARRIER": { bg: "rgba(255,80,80,0.1)", border: "rgba(255,80,80,0.25)" },
+    "REQUIREMENT": { bg: "rgba(180,180,255,0.1)", border: "rgba(180,180,255,0.3)" },
+    "INSIGHT": { bg: "rgba(255,255,255,0.06)", border: "rgba(255,255,255,0.2)" },
+    "FUTURE": { bg: "rgba(100,220,200,0.1)", border: "rgba(100,220,200,0.3)" },
   };
 
-  const downloadCsv = () => {
-    const csv = buildCsv();
-    const blob = new Blob([csv], {type:"text/csv"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `shape_science_responses_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const filteredThemes = activeTheme === "ALL"
+    ? INSIGHT_THEMES
+    : INSIGHT_THEMES.filter(t => t.id === activeTheme);
 
-  const emailExport = () => {
-    const summary = [
-      `Shape Science — Weekly Digest`,
-      `Generated ${new Date().toLocaleString()}`,
-      ``,
-      `Total responses: ${total}`,
-      ``,
-      `By sector:`,
-      ...SECTORS.map(s => `  ${s.short}: ${sectorCounts[s.id]||0} (${total?((sectorCounts[s.id]||0)/total*100).toFixed(0):0}%)`),
-      ``,
-      `Completion rate:`,
-      ...SECTORS.map(s => `  ${s.short}: ${completion[s.id].toFixed(0)}%`),
-    ].join("\n");
-    const subject = encodeURIComponent("Shape Science — Responses Digest");
-    const body = encodeURIComponent(summary + "\n\n(Full CSV export downloaded separately)");
-    window.open(`mailto:${EMAIL_TARGET}?subject=${subject}&body=${body}`);
-  };
-
-  // UI
-  const toggleExpanded = (id) => setExpandedId(expandedId === id ? null : id);
+  // Count recurring insights
+  const recurringCount = INSIGHT_THEMES.reduce((sum, t) => sum + t.insights.filter(i => i.tag === "RECURRING").length, 0);
+  const totalInsights = INSIGHT_THEMES.reduce((sum, t) => sum + t.insights.length, 0);
 
   return (
     <section style={{minHeight:"100vh",padding:"120px clamp(24px,6vw,80px) 60px",maxWidth:1100,margin:"0 auto"}}>
@@ -1139,194 +1158,123 @@ function ResultsPage() {
         <span className="bt" style={{fontSize:12,letterSpacing:"0.2em",opacity:0.5,paddingBottom:6}}>06</span>
         <h1 className="hl" style={{fontSize:"clamp(32px,6vw,60px)"}}>RESULTS</h1>
       </div>
-      <p className="bt" style={{fontSize:12,letterSpacing:"0.15em",opacity:0.45,marginBottom:32}}>
-        {total} response{total !== 1 ? "s" : ""} · {new Date().toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})}
+      <p className="bt" style={{fontSize:13,opacity:0.5,lineHeight:1.6,marginBottom:40,maxWidth:700,letterSpacing:"0.02em"}}>
+        Insights from {RESPONDENTS.length} manufacturer visits across Germany and Vietnam, March\u2013April 2026.
+        Grouped by theme to surface patterns across the supply chain.
       </p>
 
-      {total === 0 ? (
-        <div className="bt" style={{fontSize:14,opacity:0.4,padding:"60px 0",letterSpacing:"0.05em"}}>
-          No responses yet. When manufacturers complete the questionnaire on this device, results will appear here.
+      {/* Stats row */}
+      <div style={{
+        display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:16,marginBottom:48,
+      }}>
+        {[
+          { label: "MANUFACTURERS", value: RESPONDENTS.length },
+          { label: "INSIGHT THEMES", value: INSIGHT_THEMES.length },
+          { label: "TOTAL INSIGHTS", value: totalInsights },
+          { label: "RECURRING", value: recurringCount },
+        ].map(s => (
+          <div key={s.label} style={{
+            border:"1px solid rgba(255,255,255,0.08)",padding:"20px 16px",textAlign:"center",
+          }}>
+            <div className="hl" style={{fontSize:32,marginBottom:6}}>{s.value}</div>
+            <div className="bt" style={{fontSize:9,letterSpacing:"0.25em",opacity:0.4}}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Respondents row */}
+      <div className="bt" style={{fontSize:10,letterSpacing:"0.28em",opacity:0.4,marginBottom:14}}>RESPONDENTS</div>
+      <div style={{
+        display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:10,marginBottom:48,
+      }}>
+        {RESPONDENTS.map((r,i) => (
+          <div key={i} style={{
+            border:"1px solid rgba(255,255,255,0.08)",padding:"14px 16px",
+          }}>
+            <div className="bt" style={{fontSize:12,opacity:0.9,marginBottom:4,fontWeight:500}}>{r.name}</div>
+            <div className="bt" style={{fontSize:10,opacity:0.4,lineHeight:1.5}}>
+              {r.location} \u00b7 {r.type}<br/>{r.scale}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Theme filter */}
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:32,
+        paddingBottom:20,borderBottom:"1px solid rgba(255,255,255,0.08)",
+      }}>
+        {[{id:"ALL",label:"ALL THEMES"},...INSIGHT_THEMES.map(t=>({id:t.id,label:t.theme}))].map(t=>(
+          <div
+            key={t.id}
+            onClick={()=>setActiveTheme(t.id)}
+            className="bt"
+            style={{
+              padding:"6px 12px",
+              border: activeTheme===t.id ? "1px solid #fff" : "1px solid rgba(255,255,255,0.15)",
+              fontSize:9,letterSpacing:"0.15em",cursor:"none",
+              background: activeTheme===t.id ? "rgba(255,255,255,0.08)" : "transparent",
+              opacity: activeTheme===t.id ? 1 : 0.6,
+              transition:"all 0.3s",
+            }}
+          >{t.label}</div>
+        ))}
+      </div>
+
+      {/* Insight themes with bubbles */}
+      {filteredThemes.map(theme => (
+        <div key={theme.id} style={{marginBottom:40}}>
+          {/* Theme header */}
+          <div
+            onClick={() => setExpandedTheme(expandedTheme === theme.id ? null : theme.id)}
+            style={{cursor:"none",marginBottom:16}}
+          >
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:6}}>
+              <div className="hl" style={{fontSize:"clamp(18px,3vw,26px)"}}>{theme.theme}</div>
+              <div className="bt" style={{
+                fontSize:9,letterSpacing:"0.15em",opacity:0.4,
+                padding:"3px 8px",border:"1px solid rgba(255,255,255,0.15)",
+              }}>{theme.insights.length}</div>
+              <div className="bt" style={{
+                fontSize:9,letterSpacing:"0.1em",opacity:0.35,marginLeft:"auto",
+              }}>{theme.frequency} sources</div>
+            </div>
+            <div className="bt" style={{fontSize:12,opacity:0.45,letterSpacing:"0.02em"}}>{theme.tagline}</div>
+          </div>
+
+          {/* Insight bubbles */}
+          <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
+            {theme.insights.map((insight, ii) => {
+              const tc = tagColors[insight.tag] || tagColors["INSIGHT"];
+              return (
+                <div key={ii} style={{
+                  background: tc.bg,
+                  border: `1px solid ${tc.border}`,
+                  borderRadius: 24,
+                  padding: "12px 18px",
+                  maxWidth: 480,
+                  flex: "1 1 280px",
+                }}>
+                  <div className="bt" style={{fontSize:12,opacity:0.9,lineHeight:1.55,marginBottom:8}}>
+                    {insight.text}
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                    <div className="bt" style={{
+                      fontSize:8,letterSpacing:"0.2em",opacity:0.6,
+                      padding:"2px 8px",border:`1px solid ${tc.border}`,borderRadius:10,
+                    }}>{insight.tag}</div>
+                    {insight.sources.map((s,si) => (
+                      <div key={si} className="bt" style={{fontSize:9,opacity:0.35,letterSpacing:"0.05em"}}>
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      ) : (
-        <>
-          {/* TOP ROW — Distribution pie + Completion bars side-by-side */}
-          <div style={{
-            display:"grid",gridTemplateColumns:"1fr 1fr",gap:40,marginBottom:48,
-          }} className="stats-grid">
-            {/* Distribution pie */}
-            <div style={{border:"1px solid rgba(255,255,255,0.08)",padding:24,borderRadius:2}}>
-              <div className="bt" style={{fontSize:10,letterSpacing:"0.28em",opacity:0.5,marginBottom:18}}>
-                DISTRIBUTION
-              </div>
-              <div style={{display:"flex",alignItems:"center",gap:20}}>
-                <svg viewBox="0 0 160 160" style={{width:140,height:140,flexShrink:0}}>
-                  {slices.map((s,i)=>(
-                    <path key={i} d={s.path} fill={s.color} stroke="#000" strokeWidth="1.5"/>
-                  ))}
-                </svg>
-                <div style={{flex:1,minWidth:0}}>
-                  {slices.map((s,i)=>(
-                    <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                      <div style={{width:10,height:10,background:s.color,flexShrink:0,border:"1px solid rgba(255,255,255,0.15)"}}/>
-                      <div className="bt" style={{fontSize:11,opacity:0.85,flex:1,letterSpacing:"0.02em",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-                        {s.label}
-                      </div>
-                      <div className="bt" style={{fontSize:11,opacity:0.55,flexShrink:0}}>
-                        {s.count} · {(s.pct*100).toFixed(0)}%
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+      ))}
 
-            {/* Completion rate bars */}
-            <div style={{border:"1px solid rgba(255,255,255,0.08)",padding:24,borderRadius:2}}>
-              <div className="bt" style={{fontSize:10,letterSpacing:"0.28em",opacity:0.5,marginBottom:18}}>
-                COMPLETION RATE
-              </div>
-              {SECTORS.map(s => (
-                <div key={s.id} style={{marginBottom:14}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
-                    <div className="bt" style={{fontSize:11,opacity:0.85,letterSpacing:"0.02em"}}>{s.short}</div>
-                    <div className="bt" style={{fontSize:10,opacity:0.55}}>{completion[s.id].toFixed(0)}%</div>
-                  </div>
-                  <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:1,overflow:"hidden"}}>
-                    <div style={{
-                      width:`${completion[s.id]}%`,height:"100%",background:"#fff",
-                      transition:"width 0.6s cubic-bezier(0.16,1,0.3,1)",
-                    }}/>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Action row — export */}
-          <div style={{
-            display:"flex",gap:8,marginBottom:32,flexWrap:"wrap",
-          }}>
-            <div onClick={downloadCsv} className="bt" style={{
-              padding:"8px 18px",border:"1px solid rgba(255,255,255,0.25)",
-              fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",cursor:"none",
-            }}>Download CSV</div>
-            <div onClick={emailExport} className="bt" style={{
-              padding:"8px 18px",border:"1px solid rgba(255,255,255,0.25)",
-              fontSize:10,letterSpacing:"0.2em",textTransform:"uppercase",cursor:"none",
-            }}>Email digest to me</div>
-          </div>
-
-          {/* Sector toggle */}
-          <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:24,
-            paddingBottom:20,borderBottom:"1px solid rgba(255,255,255,0.08)",
-          }}>
-            {[{id:"ALL",label:`ALL (${total})`},...SECTORS.map(s=>({id:s.id,label:`${s.short.toUpperCase()} (${sectorCounts[s.id]||0})`}))].map(t=>(
-              <div
-                key={t.id}
-                onClick={()=>setActiveSector(t.id)}
-                className="bt"
-                style={{
-                  padding:"6px 12px",
-                  border: activeSector===t.id ? "1px solid #fff" : "1px solid rgba(255,255,255,0.15)",
-                  fontSize:10,letterSpacing:"0.15em",cursor:"none",
-                  background: activeSector===t.id ? "rgba(255,255,255,0.08)" : "transparent",
-                  opacity: activeSector===t.id ? 1 : 0.6,
-                  transition:"all 0.3s",
-                }}
-              >
-                {t.label}
-              </div>
-            ))}
-          </div>
-
-          {/* Responses — collapsed by default, click to expand */}
-          <div className="bt" style={{fontSize:10,letterSpacing:"0.28em",opacity:0.5,marginBottom:14}}>
-            RESPONSES {activeSector !== "ALL" ? `· ${SECTORS.find(s=>s.id===activeSector)?.short}` : ""}
-          </div>
-
-          {filtered.length === 0 ? (
-            <div className="bt" style={{fontSize:12,opacity:0.4,padding:"20px 0"}}>
-              No responses in this sector yet.
-            </div>
-          ) : (
-            <div>
-              {filtered.map((response, idx) => {
-                const sector = SECTORS.find(s => s.id === response.sector);
-                if (!sector) return null;
-                const isOpen = expandedId === response.id;
-                const date = new Date(response.timestamp);
-                const preview = Object.values(response.answers).find(v=>v && String(v).trim().length>0) || "";
-                return (
-                  <div key={response.id} style={{
-                    borderBottom:"1px solid rgba(255,255,255,0.06)",
-                  }}>
-                    <div
-                      onClick={()=>toggleExpanded(response.id)}
-                      style={{
-                        display:"flex",alignItems:"center",gap:16,padding:"14px 0",cursor:"none",
-                      }}
-                    >
-                      <div className="bt" style={{fontSize:10,opacity:0.4,letterSpacing:"0.15em",width:36,flexShrink:0}}>
-                        {String(idx+1).padStart(3,"0")}
-                      </div>
-                      <div className="bt" style={{fontSize:11,opacity:0.85,width:160,flexShrink:0,letterSpacing:"0.02em"}}>
-                        {sector.short}
-                      </div>
-                      <div className="bt" style={{fontSize:11,opacity:0.5,width:90,flexShrink:0}}>
-                        {date.toLocaleDateString(undefined,{month:"short",day:"numeric"})}
-                      </div>
-                      <div className="bt" style={{
-                        fontSize:11,opacity:0.55,flex:1,minWidth:0,
-                        overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-                        fontStyle: preview ? "normal" : "italic",
-                      }}>
-                        {preview ? `"${String(preview).slice(0,90)}${String(preview).length>90?"…":""}"` : "(empty)"}
-                      </div>
-                      <div className="bt" style={{fontSize:10,opacity:0.5,flexShrink:0,letterSpacing:"0.1em"}}>
-                        {isOpen ? "▲" : "▼"}
-                      </div>
-                    </div>
-                    {isOpen && (
-                      <div style={{padding:"8px 0 28px 52px"}}>
-                        {sector.hypotheses.map(h => {
-                          const answered = h.questions.filter(q=>{
-                            const a = response.answers[q.id];
-                            return a && String(a).trim().length>0;
-                          });
-                          if (answered.length === 0) return null;
-                          return (
-                            <div key={h.id} style={{marginBottom:18}}>
-                              <div className="bt" style={{
-                                fontSize:10,letterSpacing:"0.18em",opacity:0.45,marginBottom:10,
-                                textTransform:"uppercase",
-                              }}>
-                                {h.statement}
-                              </div>
-                              {answered.map(q => (
-                                <div key={q.id} style={{marginBottom:10,maxWidth:800}}>
-                                  <div className="bt" style={{fontSize:11,opacity:0.4,marginBottom:3,lineHeight:1.4}}>
-                                    {q.label}
-                                  </div>
-                                  <div className="bt" style={{
-                                    fontSize:12.5,opacity:0.9,lineHeight:1.5,
-                                    paddingLeft:10,borderLeft:"1px solid rgba(255,255,255,0.15)",
-                                  }}>
-                                    {response.answers[q.id]}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
       <style>{`@media(max-width:760px){.stats-grid{grid-template-columns:1fr!important}}`}</style>
       <div style={{marginTop:40}}><Footer/></div>
     </section>
@@ -1453,6 +1401,4 @@ export default function App() {
     </>
   );
 }
-
-
 
