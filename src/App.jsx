@@ -981,6 +981,8 @@ function ResultsPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [pw, setPw] = useState("");
   const [error, setError] = useState(false);
+  const [activeTheme, setActiveTheme] = useState("ALL");
+  const [expandedTheme, setExpandedTheme] = useState(null);
 
   const tryUnlock = () => {
     if (pw.toUpperCase() === "SHAPE") {
@@ -1125,9 +1127,6 @@ function ResultsPage() {
     { name: "HNB Bio Cellulose", location: "Ho Chi Minh City, Vietnam", type: "Cellulose Processing", scale: "End-product manufacturing from BC sheets" },
     { name: "Ben Tre Growth Facilities", location: "Ben Tre, Vietnam", type: "Cellulose Growth", scale: "3 raw material growth sites" },
   ];
-
-  const [activeTheme, setActiveTheme] = useState("ALL");
-  const [expandedTheme, setExpandedTheme] = useState(null);
 
   const tagColors = {
     "RECURRING": { bg: "rgba(255,255,255,0.12)", border: "rgba(255,255,255,0.35)" },
