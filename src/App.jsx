@@ -173,7 +173,7 @@ function HomePage({ setPage }) {
         <p className="bt" style={{fontSize:"clamp(24px,4vw,52px)",fontWeight:300,lineHeight:1.3,marginBottom:48,opacity:0.85,maxWidth:800}}>{p.t}</p>
       </ScrollReveal>)}
       <ScrollReveal delay={600}>
-        <p className="bt" style={{fontSize:16,lineHeight:2,opacity:0.75,maxWidth:540,marginTop:40,letterSpacing:"0.04em"}}>
+        <p className="bt" style={{fontSize:16,lineHeight:2,color:"rgba(255,255,255,0.85)",maxWidth:540,marginTop:40,letterSpacing:"0.04em"}}>
           A new approach to material design — where biology meets computation, and form is grown rather than imposed.
         </p>
       </ScrollReveal>
@@ -198,16 +198,34 @@ function AboutPage() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => { const c = () => setIsMobile(window.innerWidth <= 768); c(); window.addEventListener("resize", c); return () => window.removeEventListener("resize", c); }, []);
 
-  const fragments = [
-    {text:"EXPERIMENTAL DESIGN",x:"8%",y:"20%",rot:-4},{text:"COMPUTATIONAL FORM",x:"65%",y:"12%",rot:2},
-    {text:"LIVING SYSTEMS",x:"5%",y:"55%",rot:-1},{text:"GROWN STRUCTURE",x:"70%",y:"65%",rot:3},
-    {text:"MATERIAL INTELLIGENCE",x:"12%",y:"82%",rot:-2},{text:"BIOFABRICATION",x:"62%",y:"85%",rot:1},
-    {text:"FUTURE FOOTWEAR",x:"72%",y:"40%",rot:-3},{text:"GROWN, NOT MADE",x:"15%",y:"40%",rot:2},
+  const icons = {
+    dna: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M7 4h10M7 20h10M12 4v16M9 4c0 4 6 4 6 8s-6 4-6 8"/></svg>,
+    grid: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>,
+    leaf: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M17 8C8 10 5.9 16.17 3.82 21.34M17 8A5 5 0 0120 4M17 8c-4 0-8 2-10 6"/></svg>,
+    cube: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>,
+    brain: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M12 2a7 7 0 00-7 7c0 3 2 5.5 4 7.5L12 22l3-5.5c2-2 4-4.5 4-7.5a7 7 0 00-7-7z"/><circle cx="12" cy="9" r="2"/></svg>,
+    flask: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M9 3h6M10 3v7l-5 8.5a1 1 0 00.86 1.5h12.28a1 1 0 00.86-1.5L14 10V3"/></svg>,
+    shoe: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M4 18h16c1 0 2-1 2-2 0-2-3-3-5-3l-3-6H8l-1 6c-2 0-5 1-5 3 0 1 1 2 2 2z"/></svg>,
+    layer: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/></svg>,
+  };
+  const leftItems = [
+    {icon:icons.dna,text:"EXPERIMENTAL DESIGN"},{icon:icons.leaf,text:"LIVING SYSTEMS"},
+    {icon:icons.brain,text:"MATERIAL INTELLIGENCE"},{icon:icons.layer,text:"GROWN, NOT MADE"},
+  ];
+  const rightItems = [
+    {icon:icons.grid,text:"COMPUTATIONAL FORM"},{icon:icons.shoe,text:"FUTURE FOOTWEAR"},
+    {icon:icons.cube,text:"GROWN STRUCTURE"},{icon:icons.flask,text:"BIOFABRICATION"},
   ];
 
   const handleTap = () => { if (isMobile) { setHovering(p => !p); setHasInteracted(true); } };
   const handleEnter = () => { if (!isMobile) { setHovering(true); setHasInteracted(true); } };
   const handleLeave = () => { if (!isMobile) setHovering(false); };
+
+  const labelStyle = (i) => ({
+    display:"flex",alignItems:"center",gap:10,
+    opacity:hovering?0.8:0,transform:`translateY(${hovering?0:8}px)`,
+    transition:`all 0.6s ${i*100+100}ms cubic-bezier(0.16,1,0.3,1)`,pointerEvents:"none",
+  });
 
   return <section style={{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",position:"relative",padding:"120px 24px"}}>
     <div style={{position:"absolute",top:100,left:"clamp(24px,8vw,80px)",display:"flex",alignItems:"flex-end",gap:12}}>
@@ -215,37 +233,57 @@ function AboutPage() {
       <span className="hl" style={{fontSize:"clamp(28px,5vw,56px)"}}>ABOUT</span>
     </div>
 
-    {fragments.map((f,i)=><div key={i} className="hl" style={{
-      position:"absolute",left:f.x,top:f.y,fontSize:"clamp(10px,1.5vw,14px)",letterSpacing:"0.15em",
-      opacity:hovering?0.6:0,transform:`rotate(${f.rot}deg) translateY(${hovering?0:10}px)`,
-      transition:`all 0.8s ${i*80}ms cubic-bezier(0.16,1,0.3,1)`,pointerEvents:"none",whiteSpace:"nowrap",
-    }}>{f.text}</div>)}
+    <div style={{display:"flex",alignItems:"center",gap:isMobile?0:"clamp(20px,3vw,48px)",width:"100%",maxWidth:1100,justifyContent:"center"}}>
+      {!isMobile && <div style={{display:"flex",flexDirection:"column",gap:40,alignItems:"flex-end",flex:"0 0 auto",minWidth:180}}>
+        {leftItems.map((item,i) => <div key={i} style={labelStyle(i)}>
+          <span className="hl" style={{fontSize:12,letterSpacing:"0.15em",whiteSpace:"nowrap"}}>{item.text}</span>
+          <span style={{opacity:0.5,flexShrink:0}}>{item.icon}</span>
+        </div>)}
+      </div>}
 
-    <div onMouseEnter={handleEnter} onMouseLeave={handleLeave} onClick={handleTap} data-clickable style={{
-      width:"clamp(280px,40vw,500px)",height:"clamp(400px,60vh,700px)",position:"relative",cursor:"none",
-      display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",border:"1px solid rgba(255,255,255,0.03)",
-    }}>
-      <img src="/assets/about-dark.png" alt="About" onError={e=>{e.target.style.display="none"}} style={{
-        position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"contain",
-        opacity:hovering?0:1,transition:"opacity 1.2s cubic-bezier(0.16,1,0.3,1)",zIndex:2,
-      }}/>
-      <img src="/assets/about-light.png" alt="About — illuminated" onError={e=>{e.target.style.display="none"}} style={{
-        position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"contain",
-        opacity:hovering?1:0,transition:"opacity 1.2s cubic-bezier(0.16,1,0.3,1)",zIndex:1,
-      }}/>
-      {!hasInteracted && <div style={{position:"absolute",bottom:28,left:"50%",transform:"translateX(-50%)",zIndex:10,display:"flex",flexDirection:"column",alignItems:"center",gap:10,pointerEvents:"none"}}>
-        <div style={{width:36,height:36,borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.35)",display:"flex",justifyContent:"center",alignItems:"center",animation:"breathe 2.8s ease-in-out infinite"}}>
-          <div style={{width:6,height:6,borderRadius:"50%",background:"rgba(255,255,255,0.45)",animation:"breathe 2.8s ease-in-out infinite"}}/>
-        </div>
-        <p className="bt" style={{fontSize:9,letterSpacing:"0.3em",animation:"breathe 2.8s ease-in-out infinite",textTransform:"uppercase"}}>{isMobile?"tap to illuminate":"hover to illuminate"}</p>
+      <div onMouseEnter={handleEnter} onMouseLeave={handleLeave} onClick={handleTap} data-clickable style={{
+        width:"clamp(260px,35vw,420px)",height:"clamp(380px,55vh,620px)",position:"relative",cursor:"none",
+        display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",border:"1px solid rgba(255,255,255,0.03)",flexShrink:0,
+      }}>
+        <img src="/assets/about-dark.png" alt="About" onError={e=>{e.target.style.display="none"}} style={{
+          position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"contain",
+          opacity:hovering?0:1,transition:"opacity 1.2s cubic-bezier(0.16,1,0.3,1)",zIndex:2,
+        }}/>
+        <img src="/assets/about-light.png" alt="About — illuminated" onError={e=>{e.target.style.display="none"}} style={{
+          position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"contain",
+          opacity:hovering?1:0,transition:"opacity 1.2s cubic-bezier(0.16,1,0.3,1)",zIndex:1,
+        }}/>
+        {!hasInteracted && <div style={{position:"absolute",bottom:28,left:"50%",transform:"translateX(-50%)",zIndex:10,display:"flex",flexDirection:"column",alignItems:"center",gap:10,pointerEvents:"none"}}>
+          <div style={{width:36,height:36,borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.35)",display:"flex",justifyContent:"center",alignItems:"center",animation:"breathe 2.8s ease-in-out infinite"}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:"rgba(255,255,255,0.45)",animation:"breathe 2.8s ease-in-out infinite"}}/>
+          </div>
+          <p className="bt" style={{fontSize:10,letterSpacing:"0.3em",animation:"breathe 2.8s ease-in-out infinite",textTransform:"uppercase"}}>{isMobile?"tap to illuminate":"hover to illuminate"}</p>
+        </div>}
+      </div>
+
+      {!isMobile && <div style={{display:"flex",flexDirection:"column",gap:40,alignItems:"flex-start",flex:"0 0 auto",minWidth:180}}>
+        {rightItems.map((item,i) => <div key={i} style={labelStyle(i)}>
+          <span style={{opacity:0.5,flexShrink:0}}>{item.icon}</span>
+          <span className="hl" style={{fontSize:12,letterSpacing:"0.15em",whiteSpace:"nowrap"}}>{item.text}</span>
+        </div>)}
       </div>}
     </div>
 
-    <div style={{marginTop:60,maxWidth:560,textAlign:"center",opacity:hovering?0.8:0.5,transition:"opacity 0.8s"}}>
-      <p className="bt" style={{fontSize:15,lineHeight:2,letterSpacing:"0.04em",fontWeight:300,marginBottom:24}}>
+    {isMobile && <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"16px 24px",marginTop:32,width:"100%",maxWidth:360}}>
+      {[...leftItems,...rightItems].map((item,i) => <div key={i} style={{
+        display:"flex",alignItems:"center",gap:8,opacity:hovering?0.75:0,
+        transform:`translateY(${hovering?0:8}px)`,transition:`all 0.6s ${i*60+100}ms cubic-bezier(0.16,1,0.3,1)`,
+      }}>
+        <span style={{opacity:0.5,flexShrink:0}}>{item.icon}</span>
+        <span className="hl" style={{fontSize:10,letterSpacing:"0.1em"}}>{item.text}</span>
+      </div>)}
+    </div>}
+
+    <div style={{marginTop:48,maxWidth:560,textAlign:"center",opacity:hovering?0.95:0.65,transition:"opacity 0.8s"}}>
+      <p className="bt" style={{fontSize:16,lineHeight:2,letterSpacing:"0.04em",fontWeight:300,color:"#fff",marginBottom:20}}>
         Shape Science was founded by Alfie McMeeking — a PhD student at Imperial College London with a passion for microbiology, design, and engineering.
       </p>
-      <p className="bt" style={{fontSize:14,lineHeight:2,letterSpacing:"0.04em",fontWeight:300,opacity:0.7}}>
+      <p className="bt" style={{fontSize:15,lineHeight:2,letterSpacing:"0.04em",fontWeight:300,color:"rgba(255,255,255,0.85)"}}>
         Structure emerges from instruction. Form follows biology. We set the conditions — the material shapes itself.
       </p>
     </div>
@@ -267,23 +305,22 @@ function TechPage() {
   ];
 
   return <section style={{minHeight:"100vh",display:"flex",flexDirection:"column",position:"relative",padding:"140px clamp(24px,8vw,120px) 80px"}}>
-    <div style={{position:"absolute",top:100,left:"clamp(24px,8vw,80px)",display:"flex",alignItems:"flex-end",gap:12}}>
-      <span className="bt" style={{fontSize:12,letterSpacing:"0.2em",opacity:0.5}}>03</span>
-      <span className="hl" style={{fontSize:"clamp(28px,5vw,56px)"}}>TECH</span>
-    </div>
-
     <ScrollReveal>
       <div style={{maxWidth:800,marginBottom:20}}>
-        <div className="hl" style={{fontSize:"clamp(40px,8vw,100px)",lineHeight:0.9,letterSpacing:"-0.02em",marginBottom:16}}>
+        <div style={{display:"flex",alignItems:"flex-end",gap:14,marginBottom:24}}>
+          <span className="bt" style={{fontSize:13,letterSpacing:"0.2em",opacity:0.5,paddingBottom:8}}>03</span>
+          <span className="hl" style={{fontSize:"clamp(28px,4vw,42px)",opacity:0.4}}>TECH</span>
+        </div>
+        <div className="hl" style={{fontSize:"clamp(40px,8vw,100px)",lineHeight:0.9,letterSpacing:"-0.02em",marginBottom:20}}>
           THE VENA PROJECT
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:32}}>
           <div style={{padding:"4px 14px",border:"1px solid rgba(255,255,255,0.3)",display:"inline-block"}}>
-            <span className="bt" style={{fontSize:10,letterSpacing:"0.25em",opacity:0.7}}>PATENT PENDING</span>
+            <span className="bt" style={{fontSize:11,letterSpacing:"0.25em",color:"#fff",opacity:0.8}}>PATENT PENDING</span>
           </div>
-          <span className="bt" style={{fontSize:10,letterSpacing:"0.2em",opacity:0.4}}>IMPERIAL COLLEGE LONDON · VIETNAM</span>
+          <span className="bt" style={{fontSize:11,letterSpacing:"0.2em",color:"rgba(255,255,255,0.6)"}}>IMPERIAL COLLEGE LONDON · VIETNAM</span>
         </div>
-        <p className="bt" style={{fontSize:16,lineHeight:1.9,opacity:0.65,maxWidth:640,letterSpacing:"0.02em"}}>
+        <p className="bt" style={{fontSize:16,lineHeight:1.9,color:"rgba(255,255,255,0.85)",maxWidth:640,letterSpacing:"0.02em"}}>
           A platform technology that grows structured materials using biological processes guided by computational geometry. The result is a new class of material — one that is instructed, not manufactured.
         </p>
       </div>
@@ -295,9 +332,9 @@ function TechPage() {
     <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:isMobile?32:48,maxWidth:1000}}>
       {pillars.map((p,i) => <ScrollReveal key={i} delay={i*120}>
         <div style={{paddingLeft:20,borderLeft:"1px solid rgba(255,255,255,0.12)"}}>
-          <div className="bt" style={{fontSize:10,letterSpacing:"0.3em",opacity:0.35,marginBottom:10}}>{p.num}</div>
+          <div className="bt" style={{fontSize:11,letterSpacing:"0.3em",color:"rgba(255,255,255,0.5)",marginBottom:10}}>{p.num}</div>
           <div className="hl" style={{fontSize:"clamp(16px,2vw,22px)",marginBottom:12,lineHeight:1.2}}>{p.title}</div>
-          <p className="bt" style={{fontSize:13,lineHeight:1.8,opacity:0.55,letterSpacing:"0.02em"}}>{p.desc}</p>
+          <p className="bt" style={{fontSize:14,lineHeight:1.8,color:"rgba(255,255,255,0.75)",letterSpacing:"0.02em"}}>{p.desc}</p>
         </div>
       </ScrollReveal>)}
     </div>
@@ -424,7 +461,7 @@ function QuestionnairePage() {
           <div>
             <div className="bt" style={{fontSize:11,letterSpacing:"0.25em",opacity:0.4,marginBottom:14}}>0{i+1} / SECTOR</div>
             <div className="hl" style={{fontSize:22,lineHeight:1.15,marginBottom:14}}>{s.label}</div>
-            <div className="bt" style={{fontSize:13,opacity:0.5,lineHeight:1.5}}>{s.description}</div>
+            <div className="bt" style={{fontSize:14,opacity:0.7,lineHeight:1.5}}>{s.description}</div>
           </div>
           <div className="bt" style={{fontSize:11,letterSpacing:"0.2em",opacity:0.5,marginTop:24,textTransform:"uppercase"}}>{s.hypotheses.reduce((n,h)=>n+h.questions.length,0)} questions →</div>
         </div>
@@ -449,7 +486,7 @@ function QuestionnairePage() {
         <div className="hl" style={{fontSize:"clamp(18px,2.4vw,26px)",marginBottom:14,maxWidth:780,lineHeight:1.25}}>{h.statement}</div>
         <div style={{width:40,height:1,background:"rgba(255,255,255,0.25)",marginBottom:36}}/>
         {h.questions.map((q,qi)=><div key={q.id} style={{marginBottom:36}}>
-          <label className="bt" style={{fontSize:13,opacity:0.7,display:"block",marginBottom:10,lineHeight:1.45,maxWidth:780}}>
+          <label className="bt" style={{fontSize:14,opacity:0.85,display:"block",marginBottom:10,lineHeight:1.45,maxWidth:780}}>
             <span style={{opacity:0.4,marginRight:10}}>Q{qi+1}.</span>{q.label}
           </label>
           {q.type==="textarea"
@@ -582,7 +619,7 @@ function ResultsPage() {
         <span className="bt" style={{fontSize:12,letterSpacing:"0.2em",opacity:0.5,paddingBottom:6}}>06</span>
         <h1 className="hl" style={{fontSize:"clamp(32px,6vw,60px)"}}>RESULTS</h1>
       </div>
-      <p className="bt" style={{fontSize:13,opacity:0.5,lineHeight:1.6,marginBottom:40,maxWidth:700,letterSpacing:"0.02em"}}>
+      <p className="bt" style={{fontSize:14,color:"rgba(255,255,255,0.7)",lineHeight:1.6,marginBottom:40,maxWidth:700,letterSpacing:"0.02em"}}>
         Insights from {RESPONDENTS.length} manufacturer visits across Germany and Vietnam, March\u2013May 2026. Grouped by theme to surface patterns across the supply chain.
       </p>
     </div>
@@ -628,7 +665,7 @@ function ResultsPage() {
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:10,marginBottom:48}}>
         {RESPONDENTS.map((r,i) => <div key={i} style={{border:"1px solid rgba(255,255,255,0.08)",padding:"14px 16px"}}>
           <div className="bt" style={{fontSize:12,opacity:0.9,marginBottom:4,fontWeight:500}}>{r.name}</div>
-          <div className="bt" style={{fontSize:10,opacity:0.4,lineHeight:1.5}}>{r.location} · {r.type}<br/>{r.scale}</div>
+          <div className="bt" style={{fontSize:11,opacity:0.6,lineHeight:1.5}}>{r.location} · {r.type}<br/>{r.scale}</div>
         </div>)}
       </div>
 
@@ -657,7 +694,7 @@ function ResultsPage() {
           {theme.insights.map((insight,ii) => {
             const tc = tagColors[insight.tag] || tagColors["INSIGHT"];
             return <div key={ii} style={{background:tc.bg,border:`1px solid ${tc.border}`,borderRadius:24,padding:"12px 18px",maxWidth:480,flex:"1 1 280px"}}>
-              <div className="bt" style={{fontSize:12,opacity:0.9,lineHeight:1.55,marginBottom:8}}>{insight.text}</div>
+              <div className="bt" style={{fontSize:13,opacity:1,lineHeight:1.55,marginBottom:8,color:"rgba(255,255,255,0.9)"}}>{insight.text}</div>
               <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                 <div className="bt" style={{fontSize:8,letterSpacing:"0.2em",opacity:0.6,padding:"2px 8px",border:`1px solid ${tc.border}`,borderRadius:10}}>{insight.tag}</div>
                 {insight.sources.map((s,si) => <div key={si} className="bt" style={{fontSize:9,opacity:0.35}}>{s}</div>)}
