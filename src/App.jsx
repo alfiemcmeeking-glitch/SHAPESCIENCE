@@ -87,12 +87,12 @@ function ScrollReveal({ children, delay = 0 }) {
   const ref = useRef(null);
   const [vis, setVis] = useState(false);
   useEffect(() => {
-    const obs = new IntersectionObserver(([e])=>{if(e.isIntersecting){setTimeout(()=>setVis(true),delay);obs.disconnect();}},{threshold:0.15});
+    const obs = new IntersectionObserver(([e])=>{if(e.isIntersecting){setTimeout(()=>setVis(true),delay);obs.disconnect();}},{threshold:0.05,rootMargin:"0px 0px -20px 0px"});
     if(ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
   }, [delay]);
-  return <div ref={ref} style={{opacity:vis?1:0,transform:vis?"translateY(0)":"translateY(24px)",
-    transition:`opacity 0.8s ${delay}ms, transform 0.8s ${delay}ms`,transitionTimingFunction:"cubic-bezier(0.16,1,0.3,1)",
+  return <div ref={ref} style={{opacity:vis?1:0,transform:vis?"translateY(0)":"translateY(16px)",
+    transition:`opacity 0.7s ${delay}ms, transform 0.7s ${delay}ms`,transitionTimingFunction:"cubic-bezier(0.16,1,0.3,1)",
   }}>{children}</div>;
 }
 
@@ -756,8 +756,8 @@ function PresentationPage() {
   );
 
   const Strip = ({ imgs }) => (
-    <div style={{ display: "flex", gap: 3, overflowX: "auto", scrollbarWidth: "none" }}>
-      {imgs.map((im, i) => <Img key={i} src={im.src} alt={im.alt} style={{ flex: "0 0 72vw", maxWidth: 360, height: 260 }} />)}
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 3 }}>
+      {imgs.map((im, i) => <Img key={i} src={im.src} alt={im.alt} style={{ width: "100%", height: 280, objectFit: "cover" }} />)}
     </div>
   );
 
@@ -830,20 +830,20 @@ function PresentationPage() {
   );
 
   // ── image paths — all live in /assets/presentation/ ──
-  const Z = (f) => `/assets/presentation/${f}`;
+  const Z = (f) => `/assets/${f}`;
 
   return (
-    <div style={{ background: "#070707", minHeight: "100vh", paddingTop: 0 }}>
+    <div style={{ background: "#070707", minHeight: "100vh" }}>
 
       {/* LIGHTBOX */}
       {lbSrc && (
         <div onClick={closeLb} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.97)", zIndex: 99998, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
-          <button onClick={closeLb} className="bt" style={{ position: "absolute", top: "1rem", right: "1.5rem", background: "none", border: "none", color: "rgba(255,255,255,0.4)", fontSize: ".6rem", letterSpacing: ".25em", textTransform: "uppercase", cursor: "none" }}>✕ close</button>
+          <button onClick={closeLb} className="bt" style={{ position: "absolute", top: "1rem", right: "1.5rem", background: "none", border: "none", color: "rgba(255,255,255,0.4)", fontSize: 12, letterSpacing: ".2em", textTransform: "uppercase", cursor: "none" }}>✕ close</button>
           <img src={lbSrc} alt="" style={{ maxWidth: "100%", maxHeight: "90vh", objectFit: "contain" }} onClick={e => e.stopPropagation()} />
         </div>
       )}
 
-      {/* HERO */}
+      {/* HERO — full bleed, no container */}
       <section style={{ position: "relative", height: "100svh", minHeight: 600, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "clamp(2rem,6vw,4rem)", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: `url('${Z("IMG_6972.jpeg")}')`, backgroundSize: "cover", backgroundPosition: "center 30%", filter: "brightness(.3) contrast(1.15)", transform: "scale(1.04)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(7,7,7,.97) 0%, rgba(7,7,7,.35) 45%, transparent 100%)" }} />
@@ -855,9 +855,12 @@ function PresentationPage() {
         </div>
         <div style={{ position: "absolute", bottom: "2rem", right: "clamp(1.5rem,4vw,3rem)", display: "flex", flexDirection: "column", alignItems: "center", gap: ".5rem" }}>
           <div style={{ width: 1, height: 50, background: "linear-gradient(to bottom,rgba(255,255,255,0.25),transparent)" }} />
-          <span className="bt" style={{ fontSize: ".48rem", letterSpacing: ".32em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", writingMode: "vertical-rl" }}>Scroll</span>
+          <span className="bt" style={{ fontSize: 11, letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", writingMode: "vertical-rl" }}>Scroll</span>
         </div>
       </section>
+
+      {/* ALL CONTENT — max width container for desktop */}
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
 
       {/* ── 01 ZELLERFELD ── */}
       <ScrollReveal><ChapterIntro num="01" name="Chapter One" location="Zellerfeld" meta="Hamburg, Germany · Additive Manufacturing · Nike, Moncler, Hugo Boss, Havaianas" desc="World's largest fully 3D printed footwear manufacturer. The visit mapped large-scale additive manufacturing capabilities, production throughput constraints, and the critical question of whether biomaterials could integrate into digitally manufactured uppers." /></ScrollReveal>
@@ -1007,11 +1010,12 @@ function PresentationPage() {
         </div>
       </ScrollReveal>
 
-      <div style={{ padding: "1.8rem 1.5rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ padding: "1.8rem 1.5rem", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span className="bt" style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>iCURE · BBSRC</span>
         <span className="bt" style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>VENA Project · shapescience.org</span>
       </div>
 
+      </div>{/* end max-width container */}
     </div>
   );
 }
