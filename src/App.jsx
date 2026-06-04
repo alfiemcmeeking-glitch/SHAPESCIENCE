@@ -736,13 +736,13 @@ function PresentationPage() {
 
   const Grid2 = ({ imgs }) => (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
-      {imgs.map((im, i) => <Img key={i} src={im.src} alt={im.alt} style={{ width: "100%", aspectRatio: "3/4" }} />)}
+      {imgs.map((im, i) => <Img key={i} src={im.src} alt={im.alt} style={{ width: "100%", aspectRatio: "4/5", minHeight: 200 }} />)}
     </div>
   );
 
   const Grid3 = ({ imgs }) => (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 3 }}>
-      {imgs.map((im, i) => <Img key={i} src={im.src} alt={im.alt} style={{ width: "100%", aspectRatio: "1" }} />)}
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 3 }}>
+      {imgs.map((im, i) => <Img key={i} src={im.src} alt={im.alt} style={{ width: "100%", aspectRatio: "3/4", minHeight: 160 }} />)}
     </div>
   );
 
@@ -762,70 +762,70 @@ function PresentationPage() {
   );
 
   const ChapterIntro = ({ num, name, location, meta, desc }) => (
-    <div style={{ padding: "clamp(3.5rem,8vw,5.5rem) 1.5rem", maxWidth: 620, margin: "0 auto", textAlign: "center" }}>
-      <div className="hl" style={{ fontSize: "clamp(5rem,15vw,8rem)", color: "rgba(255,255,255,0.04)", lineHeight: 1 }}>{num}</div>
-      <div className="bt" style={{ fontSize: ".56rem", letterSpacing: ".4em", textTransform: "uppercase", color: "#c9a96b", marginTop: "-.6rem", marginBottom: "1.3rem" }}>{name}</div>
-      <div className="hl" style={{ fontSize: "clamp(1.7rem,6vw,3rem)", marginBottom: ".7rem", lineHeight: 1.15 }}>{location}</div>
-      <div className="bt" style={{ fontSize: ".56rem", letterSpacing: ".24em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "1.4rem" }}>{meta}</div>
-      <p className="bt" style={{ fontSize: ".72rem", lineHeight: 1.95, color: "rgba(255,255,255,0.55)" }}>{desc}</p>
+    <div style={{ padding: "clamp(4rem,8vw,6rem) clamp(1.5rem,6vw,4rem)", maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
+      <div className="hl" style={{ fontSize: "clamp(5rem,15vw,8rem)", color: "rgba(255,255,255,0.05)", lineHeight: 1 }}>{num}</div>
+      <div className="bt" style={{ fontSize: 11, letterSpacing: "0.32em", textTransform: "uppercase", color: "#c9a96b", marginTop: "-0.5rem", marginBottom: "1.2rem" }}>{name}</div>
+      <div className="hl" style={{ fontSize: "clamp(2rem,6vw,3.2rem)", marginBottom: "0.8rem", lineHeight: 1.1 }}>{location}</div>
+      <div className="bt" style={{ fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", marginBottom: "1.4rem" }}>{meta}</div>
+      <p className="bt" style={{ fontSize: 15, lineHeight: 1.9, color: "rgba(255,255,255,0.75)" }}>{desc}</p>
     </div>
   );
 
   const InsightStrip = ({ label, text, source, dim }) => (
-    <div style={{ background: "#0d0d0d", borderLeft: `2px solid ${dim ? "rgba(255,255,255,0.18)" : "#c9a96b"}`, padding: "1.8rem 1.5rem", margin: "2px 0" }}>
-      <div className="bt" style={{ fontSize: ".52rem", letterSpacing: ".34em", textTransform: "uppercase", color: "#c9a96b", marginBottom: ".45rem" }}>{label}</div>
-      <div className="bt" style={{ fontSize: ".76rem", lineHeight: 1.8, color: "rgba(255,255,255,0.62)" }}>{text}</div>
-      {source && <div className="bt" style={{ fontSize: ".5rem", letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginTop: ".45rem" }}>{source}</div>}
+    <div style={{ background: "#0d0d0d", borderLeft: `2px solid ${dim ? "rgba(255,255,255,0.25)" : "#c9a96b"}`, padding: "clamp(1.5rem,4vw,2.2rem) clamp(1.5rem,5vw,3rem)", margin: "2px 0" }}>
+      <div className="bt" style={{ fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase", color: "#c9a96b", marginBottom: "0.6rem" }}>{label}</div>
+      <div className="bt" style={{ fontSize: 15, lineHeight: 1.85, color: "rgba(255,255,255,0.85)", maxWidth: 780 }}>{text}</div>
+      {source && <div className="bt" style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginTop: "0.6rem" }}>{source}</div>}
     </div>
   );
 
   const QuoteBlock = ({ text, source }) => (
-    <div style={{ padding: "clamp(3.5rem,9vw,6rem) 1.5rem", background: "#0d0d0d", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "44vh", position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "absolute", top: "-2rem", left: "-.5rem", fontFamily: "'Georgia',serif", fontSize: "clamp(9rem,30vw,18rem)", color: "rgba(255,255,255,0.03)", lineHeight: 1, pointerEvents: "none" }}>"</div>
-      <p style={{ fontFamily: "'Georgia',serif", fontStyle: "italic", fontSize: "clamp(1.25rem,4.2vw,2.4rem)", lineHeight: 1.38, color: "#e6e2d8", textAlign: "center", maxWidth: 660, position: "relative", zIndex: 1 }}>{text}</p>
-      {source && <div className="bt" style={{ fontSize: ".5rem", letterSpacing: ".26em", textTransform: "uppercase", color: "rgba(255,255,255,0.28)", marginTop: "1.1rem", position: "relative", zIndex: 1 }}>{source}</div>}
+    <div style={{ padding: "clamp(4rem,9vw,7rem) clamp(1.5rem,8vw,6rem)", background: "#0d0d0d", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "44vh", position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", top: "-2rem", left: "-0.5rem", fontFamily: "'Georgia',serif", fontSize: "clamp(9rem,30vw,18rem)", color: "rgba(255,255,255,0.03)", lineHeight: 1, pointerEvents: "none" }}>"</div>
+      <p style={{ fontFamily: "'Georgia',serif", fontStyle: "italic", fontSize: "clamp(1.4rem,3.5vw,2.6rem)", lineHeight: 1.45, color: "#e6e2d8", textAlign: "center", maxWidth: 740, position: "relative", zIndex: 1 }}>{text}</p>
+      {source && <div className="bt" style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginTop: "1.2rem", position: "relative", zIndex: 1 }}>{source}</div>}
     </div>
   );
 
   const DataBox = ({ items }) => (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, background: "#131313", padding: 2 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 2, background: "#131313", padding: 2 }}>
       {items.map((it, i) => (
-        <div key={i} style={{ background: "#0d0d0d", padding: "1.4rem 1.2rem" }}>
-          <div className="hl" style={{ fontSize: "clamp(2.2rem,7vw,3.4rem)", color: "#c9a96b", lineHeight: 1 }}>{it.num}</div>
-          <div className="bt" style={{ fontSize: ".54rem", letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginTop: ".28rem" }}>{it.label}</div>
+        <div key={i} style={{ background: "#0d0d0d", padding: "clamp(1.2rem,3vw,1.8rem) clamp(1rem,2.5vw,1.6rem)" }}>
+          <div className="hl" style={{ fontSize: "clamp(2rem,5vw,3rem)", color: "#c9a96b", lineHeight: 1 }}>{it.num}</div>
+          <div className="bt" style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginTop: "0.4rem", lineHeight: 1.5 }}>{it.label}</div>
         </div>
       ))}
     </div>
   );
 
   const Divider = () => (
-    <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "2.8rem 1.5rem" }}>
-      <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
+    <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "3rem clamp(1.5rem,5vw,3rem)" }}>
+      <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
       <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#c9a96b" }} />
-      <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
+      <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
     </div>
   );
 
   const Placeholder = ({ title }) => (
-    <div style={{ minHeight: 220, background: "#0d0d0d", border: "1px dashed rgba(255,255,255,0.08)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: ".7rem", padding: "2.5rem 1.5rem", textAlign: "center" }}>
-      <div className="hl" style={{ fontSize: "1.6rem", letterSpacing: ".06em", color: "rgba(255,255,255,0.2)" }}>{title}</div>
-      <div className="bt" style={{ fontSize: ".55rem", letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(255,255,255,0.12)" }}>Images coming soon</div>
+    <div style={{ minHeight: 240, background: "#0d0d0d", border: "1px dashed rgba(255,255,255,0.1)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "0.8rem", padding: "3rem 1.5rem", textAlign: "center" }}>
+      <div className="hl" style={{ fontSize: "1.8rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.3)" }}>{title}</div>
+      <div className="bt" style={{ fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)" }}>Images coming soon</div>
     </div>
   );
 
   // ── gate ──
   if (!unlocked) return (
     <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, padding: "2rem" }}>
-      <div className="bt" style={{ fontSize: ".58rem", letterSpacing: ".35em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: "2.2rem" }}>Restricted Access · BBSRC Presentation</div>
-      <div className="hl" style={{ fontSize: "clamp(2.8rem,12vw,5.5rem)", letterSpacing: ".05em", textAlign: "center", lineHeight: .95, marginBottom: "2.8rem" }}>Vietnam<br/>Field<br/>Notes</div>
+      <div className="bt" style={{ fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "2.2rem" }}>Restricted Access · BBSRC Presentation</div>
+      <div className="hl" style={{ fontSize: "clamp(2.8rem,12vw,5.5rem)", letterSpacing: "0.05em", textAlign: "center", lineHeight: .95, marginBottom: "2.8rem" }}>Vietnam<br/>Field<br/>Notes</div>
       <div style={{ width: 1, height: 44, background: "linear-gradient(to bottom,transparent,rgba(255,255,255,0.2),transparent)", marginBottom: "2.8rem" }} />
       <input type="password" value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => { if (e.key === "Enter") tryUnlock(); }}
         placeholder="PASSWORD" autoCapitalize="characters"
-        style={{ width: 220, background: "transparent", border: "none", borderBottom: error ? "1px solid #c44" : "1px solid rgba(255,255,255,0.15)", color: "#fff", fontFamily: "'Helvetica Neue',Helvetica,sans-serif", fontWeight: 300, fontSize: ".9rem", letterSpacing: ".4em", textAlign: "center", padding: ".75rem 0", outline: "none", textTransform: "uppercase", transition: "border-color .3s", cursor: "none", display: "block", marginBottom: ".6rem" }} />
-      {error && <div className="bt" style={{ fontSize: ".55rem", letterSpacing: ".2em", color: "#c44", textTransform: "uppercase", marginBottom: ".6rem" }}>Incorrect password</div>}
-      <div onClick={tryUnlock} className="bt" style={{ marginTop: ".5rem", background: "transparent", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)", fontSize: ".58rem", letterSpacing: ".3em", textTransform: "uppercase", padding: ".65rem 2.2rem", cursor: "none", transition: "all .3s" }}
+        style={{ width: 220, background: "transparent", border: "none", borderBottom: error ? "1px solid #c44" : "1px solid rgba(255,255,255,0.2)", color: "#fff", fontFamily: "'Helvetica Neue',Helvetica,sans-serif", fontWeight: 300, fontSize: 16, letterSpacing: "0.4em", textAlign: "center", padding: "0.75rem 0", outline: "none", textTransform: "uppercase", transition: "border-color .3s", cursor: "none", display: "block", marginBottom: "0.6rem" }} />
+      {error && <div className="bt" style={{ fontSize: 12, letterSpacing: "0.18em", color: "#c44", textTransform: "uppercase", marginBottom: "0.6rem" }}>Incorrect password</div>}
+      <div onClick={tryUnlock} className="bt" style={{ marginTop: "0.5rem", background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.6)", fontSize: 12, letterSpacing: "0.28em", textTransform: "uppercase", padding: "0.65rem 2.2rem", cursor: "none", transition: "all .3s" }}
         onMouseEnter={e => { e.target.style.borderColor = "#c9a96b"; e.target.style.color = "#c9a96b"; }}
-        onMouseLeave={e => { e.target.style.borderColor = "rgba(255,255,255,0.15)"; e.target.style.color = "rgba(255,255,255,0.5)"; }}>Enter</div>
+        onMouseLeave={e => { e.target.style.borderColor = "rgba(255,255,255,0.2)"; e.target.style.color = "rgba(255,255,255,0.6)"; }}>Enter</div>
     </section>
   );
 
@@ -845,13 +845,13 @@ function PresentationPage() {
 
       {/* HERO */}
       <section style={{ position: "relative", height: "100svh", minHeight: 600, display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "clamp(2rem,6vw,4rem)", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, backgroundImage: `url('${Z("factory-hero.jpg")}')`, backgroundSize: "cover", backgroundPosition: "center 30%", filter: "brightness(.3) contrast(1.15)", transform: "scale(1.04)" }} />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `url('${Z("IMG_6972.jpeg")}')`, backgroundSize: "cover", backgroundPosition: "center 30%", filter: "brightness(.3) contrast(1.15)", transform: "scale(1.04)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(7,7,7,.97) 0%, rgba(7,7,7,.35) 45%, transparent 100%)" }} />
         <div style={{ position: "relative", zIndex: 2, maxWidth: 820 }}>
-          <div className="bt" style={{ fontSize: ".56rem", letterSpacing: ".38em", textTransform: "uppercase", color: "#c9a96b", marginBottom: "1.3rem" }}>iCURE · BBSRC Innovation to Commercialisation Programme</div>
+          <div className="bt" style={{ fontSize: 12, letterSpacing: "0.32em", textTransform: "uppercase", color: "#c9a96b", marginBottom: "1.3rem" }}>iCURE · BBSRC Innovation to Commercialisation Programme</div>
           <div className="hl" style={{ fontSize: "clamp(4rem,17vw,10rem)", lineHeight: .88, marginBottom: "1.5rem" }}>Vietnam<br/>Field<br/>Notes</div>
-          <div className="bt" style={{ fontSize: ".58rem", letterSpacing: ".28em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "1.8rem" }}>Six Weeks · Two Countries · Nine Sites · One Commercial Pathway</div>
-          <p className="bt" style={{ fontSize: ".74rem", lineHeight: 1.9, color: "rgba(255,255,255,0.45)", maxWidth: 460 }}>A visual record of factories, laboratories, production facilities, and commercial discoveries — assembled to map the route from laboratory research to industrial-scale manufacture.</p>
+          <div className="bt" style={{ fontSize: 12, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", marginBottom: "1.8rem" }}>Six Weeks · Two Countries · Nine Sites · One Commercial Pathway</div>
+          <p className="bt" style={{ fontSize: 15, lineHeight: 1.9, color: "rgba(255,255,255,0.7)", maxWidth: 480 }}>A visual record of factories, laboratories, production facilities, and commercial discoveries — assembled to map the route from laboratory research to industrial-scale manufacture.</p>
         </div>
         <div style={{ position: "absolute", bottom: "2rem", right: "clamp(1.5rem,4vw,3rem)", display: "flex", flexDirection: "column", alignItems: "center", gap: ".5rem" }}>
           <div style={{ width: 1, height: 50, background: "linear-gradient(to bottom,rgba(255,255,255,0.25),transparent)" }} />
@@ -862,15 +862,15 @@ function PresentationPage() {
       {/* ── 01 ZELLERFELD ── */}
       <ScrollReveal><ChapterIntro num="01" name="Chapter One" location="Zellerfeld" meta="Hamburg, Germany · Additive Manufacturing · Nike, Moncler, Hugo Boss, Havaianas" desc="World's largest fully 3D printed footwear manufacturer. The visit mapped large-scale additive manufacturing capabilities, production throughput constraints, and the critical question of whether biomaterials could integrate into digitally manufactured uppers." /></ScrollReveal>
 
-      <ScrollReveal><Grid2 imgs={[{ src: Z("zellerfeld-sign.jpg"), alt: "Zellerfeld sign" }, { src: Z("zellerfeld-building.jpg"), alt: "Zellerfeld building" }]} /></ScrollReveal>
+      <ScrollReveal><Grid2 imgs={[{ src: Z("IMG_6386.jpeg"), alt: "Zellerfeld sign" }, { src: Z("IMG_6387.jpeg"), alt: "Zellerfeld building" }]} /></ScrollReveal>
 
       <ScrollReveal><InsightStrip label="Key Finding · Manufacturing Route" text="3D printing cost per unit is not competitive at the volumes shoe manufacturers require — MOQ 3,000+ per size at large factories makes additive manufacturing economically unviable for standard production. It remains viable for limited-edition and personalised applications." source="Source: Zellerfeld · Cross-referenced: XTL, Sumtop" /></ScrollReveal>
 
-      <ScrollReveal><FullBleed src={Z("zellerfeld-floor-team.jpg")} alt="Zellerfeld factory floor" /></ScrollReveal>
+      <ScrollReveal><FullBleed src={Z("IMG_6397.jpeg")} alt="Zellerfeld factory floor" /></ScrollReveal>
 
       <ScrollReveal>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 3 }}>
-          <Img src={Z("zellerfeld-team.jpg")} alt="Research team at Zellerfeld" style={{ width: "100%", aspectRatio: "3/4" }} />
+          <Img src={Z("IMG_6400.jpeg")} alt="Research team at Zellerfeld" style={{ width: "100%", aspectRatio: "3/4" }} />
           <div style={{ background: "#0d0d0d", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem 1.2rem" }}>
             <div style={{ textAlign: "center" }}>
               <div className="hl" style={{ fontSize: "3.5rem", color: "rgba(255,255,255,0.06)", lineHeight: 1 }}>01</div>
@@ -892,29 +892,29 @@ function PresentationPage() {
       {/* ── 02 CNES SHOES ── */}
       <ScrollReveal><ChapterIntro num="02" name="Chapter Two" location="CNES Shoes" meta="Ho Chi Minh City, Vietnam · Medium-Scale Manufacture · MOQ ~200 units" desc="First factory floor access in Vietnam. Observed traditional footwear assembly — hourly throughput, cutting and stitching workflows, labour structures, and the exact points where a new material format would need to integrate without disrupting existing production lines." /></ScrollReveal>
 
-      <ScrollReveal><FullBleed src={Z("cnes-floor-wide.jpg")} alt="CNES factory floor" /></ScrollReveal>
+      <ScrollReveal><FullBleed src={Z("IMG_6972.jpeg")} alt="CNES factory floor" /></ScrollReveal>
 
       <ScrollReveal><InsightStrip label="Key Finding · Scale & Entry Point" text="Medium-scale factories are the realistic initial customer. Lower barriers, practical testing approach, owner makes decisions directly — no brand approval chain, no 3–6 month materials approval process. MOQ around 200 units per run." source="Source: CNES Shoes, Medium Factory HCMC" /></ScrollReveal>
 
-      <ScrollReveal><Grid3 imgs={[{ src: Z("cnes-assembly-1.jpg"), alt: "CNES sewing assembly" }, { src: Z("cnes-cnc.jpg"), alt: "CNC cutting machine" }, { src: Z("cnes-cutting.jpg"), alt: "Cutting station" }]} /></ScrollReveal>
+      <ScrollReveal><Grid3 imgs={[{ src: Z("IMG_6975.jpeg"), alt: "CNES sewing assembly" }, { src: Z("IMG_6976.jpeg"), alt: "CNC cutting machine" }, { src: Z("IMG_6978.jpeg"), alt: "Cutting station" }]} /></ScrollReveal>
 
-      <ScrollReveal><HeroSide main={{ src: Z("cnes-sneakers.jpg"), alt: "Finished burgundy sneakers" }} side={[{ src: Z("cnes-lasts.jpg"), alt: "Shoe lasts and sole" }, { src: Z("cnes-scanner.jpg"), alt: "MatriXcope scanner" }]} /></ScrollReveal>
+      <ScrollReveal><HeroSide main={{ src: Z("IMG_6993.jpeg"), alt: "Finished burgundy sneakers" }} side={[{ src: Z("IMG_6980.jpeg"), alt: "Shoe lasts and sole" }, { src: Z("IMG_6982.jpeg"), alt: "MatriXcope scanner" }]} /></ScrollReveal>
 
       <ScrollReveal><DataBox items={[{ num: "3–4", label: "Bonded layers in a typical shoe upper" }, { num: "20–25%", label: "Of total production time on adhesive application and drying" }, { num: "5–8%", label: "Reject rate from adhesive failure and delamination" }, { num: "6mm", label: "Maximum accepted sheet thickness for die-cutting" }]} /></ScrollReveal>
 
-      <ScrollReveal><FullBleed src={Z("cnes-assembly-wide.jpg")} alt="CNES large assembly hall" /></ScrollReveal>
+      <ScrollReveal><FullBleed src={Z("IMG_6995.jpeg")} alt="CNES large assembly hall" /></ScrollReveal>
 
       <ScrollReveal><InsightStrip label="Key Finding · Monomaterial Advantage" text="A single material replacing outer, reinforcement, and padding layers would dramatically simplify production — if it is die-cuttable, holds shape, and is skin-comfortable. Adhesive failure and delamination cause 5–8% reject rates; in hot, humid conditions the failure rate increases. This is the pain point a monomaterial directly addresses." source="Source: CNES Shoes · Cross-referenced: XTL" /></ScrollReveal>
 
-      <ScrollReveal><Grid2 imgs={[{ src: Z("cnes-leather-worker.jpg"), alt: "Worker at leather table" }, { src: Z("cnes-leather-stock.jpg"), alt: "Leather rolls stacked high" }]} /></ScrollReveal>
+      <ScrollReveal><Grid2 imgs={[{ src: Z("IMG_7003.jpeg"), alt: "Worker at leather table" }, { src: Z("IMG_7004.jpeg"), alt: "Leather rolls stacked high" }]} /></ScrollReveal>
 
-      <ScrollReveal><Grid3 imgs={[{ src: Z("cnes-patterns.jpg"), alt: "Cut patterns on bench" }, { src: Z("cnes-pattern-trace.jpg"), alt: "Pattern tracing on leather" }, { src: Z("cnes-loafers.jpg"), alt: "Loafers on lasts for QC" }]} /></ScrollReveal>
+      <ScrollReveal><Grid3 imgs={[{ src: Z("IMG_7006.jpeg"), alt: "Cut patterns on bench" }, { src: Z("IMG_7008.jpeg"), alt: "Pattern tracing on leather" }, { src: Z("IMG_7002.jpeg"), alt: "Loafers on lasts for QC" }]} /></ScrollReveal>
 
       <ScrollReveal><InsightStrip label="Key Finding · Supply Chain Integration" text="Material must be die-cuttable with existing equipment. Any change to the production line will face strong resistance. Flat sheets and rolls up to 6mm thickness are the accepted formats. Wet or damp substrates are a hard constraint — current workflows cannot accommodate them." source="Source: CNES Shoes, XTL, Sumtop, APEX" /></ScrollReveal>
 
-      <ScrollReveal><Grid2 imgs={[{ src: Z("cnes-lasting.jpg"), alt: "Hand lasting close detail" }, { src: Z("cnes-soles.jpg"), alt: "Sole components on workbench" }]} /></ScrollReveal>
+      <ScrollReveal><Grid2 imgs={[{ src: Z("IMG_7009.jpeg"), alt: "Hand lasting close detail" }, { src: Z("IMG_7012.jpeg"), alt: "Sole components on workbench" }]} /></ScrollReveal>
 
-      <ScrollReveal><Strip imgs={[{ src: Z("cnes-packaging.jpg"), alt: "Boxes and factory" }, { src: Z("cnes-shelves.jpg"), alt: "Finished shoes on shelves" }, { src: Z("cnes-textured.jpg"), alt: "Textured uppers on lasts" }, { src: Z("cnes-white.jpg"), alt: "White uppers in-process" }]} /></ScrollReveal>
+      <ScrollReveal><Strip imgs={[{ src: Z("IMG_6984.jpeg"), alt: "Boxes and factory" }, { src: Z("IMG_6986.jpeg"), alt: "Finished shoes on shelves" }, { src: Z("IMG_6999.jpeg"), alt: "Textured uppers on lasts" }, { src: Z("IMG_6997.jpeg"), alt: "White uppers in-process" }, { src: Z("IMG_6989.jpeg"), alt: "Assembly detail" }, { src: Z("IMG_6991.jpeg"), alt: "Shoe racks" }]} /></ScrollReveal>
 
       <ScrollReveal><QuoteBlock text="Factories tell a different story from laboratories. Scale is real, the ecosystem is complex, and integration demands more than material performance alone." source="CNES Shoes · Ho Chi Minh City" /></ScrollReveal>
 
@@ -922,7 +922,8 @@ function PresentationPage() {
 
       {/* ── 03 HNB ── */}
       <ScrollReveal><ChapterIntro num="03" name="Chapter Three" location="HNB Cosmetics" meta="Ho Chi Minh City, Vietnam · Biocellulose Manufacturer · Visited 3 Times" desc="Potential manufacturing partner for bacterial nanocellulose at industrial scale. Visited three times across the programme — examining fermentation operations, post-processing, quality control, and industrial-scale production constraints first-hand." /></ScrollReveal>
-      <ScrollReveal><Placeholder title="HNB Biocellulose" /></ScrollReveal>
+      <ScrollReveal><Grid2 imgs={[{ src: Z("IMG_3531.jpeg"), alt: "HNB production facility" }, { src: Z("IMG_3535.jpeg"), alt: "HNB biocellulose processing" }]} /></ScrollReveal>
+      <ScrollReveal><Grid2 imgs={[{ src: Z("IMG_7349.jpeg"), alt: "HNB facility visit" }, { src: Z("IMG_7821.jpeg"), alt: "HNB biocellulose production" }]} /></ScrollReveal>
       <ScrollReveal><InsightStrip label="Key Finding · Cellulose Production" text="10–12% of finished cellulose sheets are rejected at QC for thickness inconsistency, holes, or uneven moisture. Porosity is controlled through growth time and sugar concentration — current tolerances are loose (±15%). Tighter control requires environmental investment. Contamination is the biggest issue (~8% tray reject rate)." source="Source: HNB Bio · Cross-referenced: Ben Tre Facilities" /></ScrollReveal>
       <ScrollReveal><InsightStrip label="Key Finding · Cosmetic Application" dim text="Mask adherence to facial contours and active ingredient delivery are the two performance metrics cosmetic brands care most about. If the scaffold demonstrably improves adherence and delivery, cosmetic brand clients would be very interested — validation takes 3–4 months." source="Source: HNB Bio" /></ScrollReveal>
       <ScrollReveal><QuoteBlock text="Industrial bacterial cellulose production already exists at scale. The question is where it creates the most value." source="HNB Bio · Ho Chi Minh City" /></ScrollReveal>
@@ -931,7 +932,10 @@ function PresentationPage() {
 
       {/* ── 04 XINGTAILAI ── */}
       <ScrollReveal><ChapterIntro num="04" name="Chapter Four" location="Xingtailai" meta="Hanoi, Vietnam · Large-Scale Manufacture · Adidas, Prada, Puma, New Balance, Vans, Under Armour" desc="Large-volume production facility producing for some of the world's most demanding footwear brands. Examined production scale requirements, temperature processing envelopes, material performance constraints, and the brand-driven approval process that governs all material decisions at this scale." /></ScrollReveal>
-      <ScrollReveal><Placeholder title="Xingtailai · Hanoi" /></ScrollReveal>
+      <ScrollReveal><FullBleed src={Z("Screenshot 2026-06-04 at 1.42.01 pm.png")} alt="Xingtailai factory" /></ScrollReveal>
+      <ScrollReveal><Grid3 imgs={[{ src: Z("Screenshot 2026-06-04 at 1.44.03 pm.png"), alt: "Xingtailai production" }, { src: Z("Screenshot 2026-06-04 at 1.44.21 pm.png"), alt: "Xingtailai floor" }, { src: Z("Screenshot 2026-06-04 at 1.44.35 pm.png"), alt: "Xingtailai detail" }]} /></ScrollReveal>
+      <ScrollReveal><Grid3 imgs={[{ src: Z("Screenshot 2026-06-04 at 1.44.50 pm.png"), alt: "Xingtailai manufacturing" }, { src: Z("Screenshot 2026-06-04 at 1.45.04 pm.png"), alt: "Xingtailai assembly" }, { src: Z("Screenshot 2026-06-04 at 1.45.28 pm.png"), alt: "Xingtailai overview" }]} /></ScrollReveal>
+      <ScrollReveal><Grid2 imgs={[{ src: Z("Screenshot 2026-06-04 at 1.45.48 pm.png"), alt: "Xingtailai facility" }, { src: Z("Screenshot 2026-06-04 at 1.46.08 pm.png"), alt: "Xingtailai production line" }]} /></ScrollReveal>
       <ScrollReveal><InsightStrip label="Key Finding · Supply Chain Integration" text="Material decisions at large factories are entirely brand-driven. The factory processes whatever the brand's approved materials list specifies. For a new supplier, brands require factory audit, full data sheet, and physical test reports against internal standards. Approval takes 3–6 months." source="Source: XTL · Cross-referenced: Sumtop, APEX" /></ScrollReveal>
       <ScrollReveal><InsightStrip label="Key Finding · Scale & Entry Point" dim text="Large-scale factories are a longer-term target once the material is proven at smaller volumes. Limited-edition and innovation capsule lines are the natural entry point at brand level — they absorb 20–30% retail premiums. Variable-density midsoles without multi-piece construction would reduce bill of materials, labour, and assembly time." source="Source: XTL, Sumtop, Zellerfeld" /></ScrollReveal>
 
@@ -939,28 +943,38 @@ function PresentationPage() {
 
       {/* ── 05 SUMTOP ── */}
       <ScrollReveal><ChapterIntro num="05" name="Chapter Five" location="Sumtop" meta="Ho Chi Minh City, Vietnam · Large-Scale Manufacture · Skechers, FILA, Gola, DVS, DC" desc="Contract manufacturer with full visibility on production economics at scale. Investigated minimum order quantities, manufacturing timelines, tooling requirements, and the batch production economics that any scale-up strategy must account for." /></ScrollReveal>
-      <ScrollReveal><Placeholder title="Sumtop · HCMC" /></ScrollReveal>
+      <ScrollReveal><FullBleed src={Z("Screenshot 2026-06-04 at 1.46.47 pm.png")} alt="Sumtop factory" /></ScrollReveal>
+      <ScrollReveal><Grid3 imgs={[{ src: Z("Screenshot 2026-06-04 at 1.46.57 pm.png"), alt: "Sumtop production" }, { src: Z("Screenshot 2026-06-04 at 1.47.09 pm.png"), alt: "Sumtop floor" }, { src: Z("Screenshot 2026-06-04 at 1.47.21 pm.png"), alt: "Sumtop assembly" }]} /></ScrollReveal>
+      <ScrollReveal><Grid3 imgs={[{ src: Z("Screenshot 2026-06-04 at 1.47.31 pm.png"), alt: "Sumtop manufacturing" }, { src: Z("Screenshot 2026-06-04 at 1.47.42 pm.png"), alt: "Sumtop detail" }, { src: Z("Screenshot 2026-06-04 at 1.47.55 pm.png"), alt: "Sumtop overview" }]} /></ScrollReveal>
+      <ScrollReveal><Strip imgs={[{ src: Z("Screenshot 2026-06-04 at 1.48.06 pm.png"), alt: "Sumtop facility" }, { src: Z("Screenshot 2026-06-04 at 1.48.18 pm.png"), alt: "Sumtop production line" }, { src: Z("Screenshot 2026-06-04 at 1.48.32 pm.png"), alt: "Sumtop workers" }, { src: Z("Screenshot 2026-06-04 at 1.48.43 pm.png"), alt: "Sumtop machines" }, { src: Z("Screenshot 2026-06-04 at 1.48.56 pm.png"), alt: "Sumtop interior" }, { src: Z("Screenshot 2026-06-04 at 1.49.15 pm.png"), alt: "Sumtop finished goods" }]} /></ScrollReveal>
       <ScrollReveal><QuoteBlock text="Commercialisation depends as much on manufacturing reality as it does on material science. Every constraint in the factory is a design parameter." source="Field Observation · Multiple Factories" /></ScrollReveal>
 
       <Divider />
 
       {/* ── 06 APEX ── */}
       <ScrollReveal><ChapterIntro num="06" name="Chapter Six" location="Apex" meta="Ho Chi Minh City, Vietnam · Advanced Manufacturing · Skechers, Zara, ECCO, DC" desc="Advanced footwear manufacturer with injection moulding capabilities and vertical integration. Investigated production efficiency innovations and routes to reduce manufacturing steps — a critical advantage if a monomaterial upper can eliminate the multi-layer bonding process." /></ScrollReveal>
-      <ScrollReveal><Placeholder title="Apex · HCMC" /></ScrollReveal>
+      <ScrollReveal><FullBleed src={Z("IMG_7750.jpeg")} alt="Apex factory" /></ScrollReveal>
+      <ScrollReveal><Grid3 imgs={[{ src: Z("IMG_7751.jpeg"), alt: "Apex production" }, { src: Z("IMG_7754.jpeg"), alt: "Apex manufacturing" }, { src: Z("IMG_7756.jpeg"), alt: "Apex floor" }]} /></ScrollReveal>
+      <ScrollReveal><Grid3 imgs={[{ src: Z("3a26c6a7bb86c28eab51b4b5f6b7afb7.jpg"), alt: "Apex facility" }, { src: Z("e36a301d9535540c8025bd42aed98fa4.jpg"), alt: "Apex overview" }, { src: Z("IMG_7758.jpeg"), alt: "Apex detail" }]} /></ScrollReveal>
       <ScrollReveal><InsightStrip label="Key Finding · Scale & Entry Point" text="The largest manufacturers — Apex-scale and above — produce for Nike and other major global brands. They are always actively sourcing new materials that meet brand specifications. The pathway is clear: prove at medium scale, accumulate test data, enter the brand approval process. The infrastructure to scale already exists." source="Source: APEX" /></ScrollReveal>
 
       <Divider />
 
       {/* ── 07 FABRIC ── */}
       <ScrollReveal><ChapterIntro num="07" name="Chapter Seven" location="Textile Supply Chain" meta="Ho Chi Minh City, Vietnam · Wholesale Fabric Supplier" desc="Wholesale textile supplier serving footwear factories across the region. Understanding material dimensions, roll formats, MOQ requirements, lead times, and the constraints suppliers impose on downstream manufacturing revealed what format any new material must conform to." /></ScrollReveal>
-      <ScrollReveal><Placeholder title="Textile Supply Chain" /></ScrollReveal>
+      <ScrollReveal><FullBleed src={Z("IMG_7833.jpeg")} alt="Wholesale fabric supplier" /></ScrollReveal>
+      <ScrollReveal><Grid2 imgs={[{ src: Z("IMG_7835.jpeg"), alt: "Fabric rolls" }, { src: Z("IMG_7837.jpeg"), alt: "Textile stock" }]} /></ScrollReveal>
+      <ScrollReveal><Grid2 imgs={[{ src: Z("IMG_7840.jpeg"), alt: "Material sourcing" }, { src: Z("IMG_7841.jpeg"), alt: "Fabric supplier detail" }]} /></ScrollReveal>
       <ScrollReveal><QuoteBlock text="Every conversation revealed another layer of the ecosystem. Supply chains are architectures of constraint — and constraint is where opportunity lives." source="Field Observation · HCMC" /></ScrollReveal>
 
       <Divider />
 
       {/* ── 08 BIOCELLULOSE FACTORIES ── */}
       <ScrollReveal><ChapterIntro num="08" name="Chapter Eight" location="Biocellulose Factories" meta="Ho Chi Minh City Region & Ben Tre, Vietnam · 4 Facilities · Cosmetic & Food Grade" desc="Four separate bacterial nanocellulose production facilities. The Ben Tre visits confirmed that scalability is no longer the primary challenge — production methods closely mirror the laboratory process. Contamination control and thickness consistency remain the key manufacturing constraints." /></ScrollReveal>
-      <ScrollReveal><Placeholder title="Biocellulose Production" /></ScrollReveal>
+      <ScrollReveal><FullBleed src={Z("IMG_7360.jpeg")} alt="Biocellulose production" /></ScrollReveal>
+      <ScrollReveal><Grid3 imgs={[{ src: Z("Screenshot 2026-06-04 at 1.50.22 pm.png"), alt: "Biocellulose factory" }, { src: Z("Screenshot 2026-06-04 at 1.50.44 pm.png"), alt: "Cellulose growth trays" }, { src: Z("Screenshot 2026-06-04 at 1.50.56 pm.png"), alt: "Production facility" }]} /></ScrollReveal>
+      <ScrollReveal><Grid2 imgs={[{ src: Z("a28b9b19-fa2c-4e42-bcf9-a37a99b1b666.jpg"), alt: "Biocellulose sheets" }, { src: Z("f1f044f3-4485-4aa9-a11f-0ad6f183cbb0.jpg"), alt: "Cellulose processing" }]} /></ScrollReveal>
+      <ScrollReveal><Strip imgs={[{ src: Z("Screenshot 2026-06-04 at 1.51.21 pm.png"), alt: "Ben Tre facility" }, { src: Z("Screenshot 2026-06-04 at 1.51.54 pm.png"), alt: "Cellulose production scale" }]} /></ScrollReveal>
       <ScrollReveal><InsightStrip label="Key Finding · Cellulose Production Validated" text="Ben Tre facilities produce bacterial cellulose sheets at scale using methods very close to the lab process — scalability is confirmed. Contamination is the biggest issue (~8% tray reject rate). Scaffold must be biocompatible with bacterial culture and not inhibit cellulose growth; growth facilities are open to trialling if compatible." source="Source: Ben Tre Facilities, HNB Bio" /></ScrollReveal>
       <ScrollReveal><QuoteBlock text="Scale already exists. The infrastructure is there. Value creation is now the challenge — and the opportunity." source="Ben Tre · Vietnam" /></ScrollReveal>
 
@@ -983,19 +997,19 @@ function PresentationPage() {
             ].map((s, i) => (
               <div key={i} style={{ background: "#0d0d0d", padding: "1.7rem 1.3rem" }}>
                 <div className="hl" style={{ fontSize: "clamp(2.6rem,9vw,4.5rem)", color: "#c9a96b", lineHeight: 1 }}>{s.n}</div>
-                <div className="bt" style={{ fontSize: ".53rem", letterSpacing: ".2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginTop: ".22rem" }}>{s.l}</div>
+                <div className="bt" style={{ fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginTop: "0.22rem" }}>{s.l}</div>
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: "'Georgia',serif", fontStyle: "italic", fontSize: "clamp(.9rem,2.8vw,1.4rem)", lineHeight: 1.7, color: "rgba(255,255,255,0.4)", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "2.2rem", marginTop: "2px" }}>
+          <p style={{ fontFamily: "'Georgia',serif", fontStyle: "italic", fontSize: "clamp(1rem,2.5vw,1.4rem)", lineHeight: 1.75, color: "rgba(255,255,255,0.65)", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "2.2rem", marginTop: "2px" }}>
             Through direct engagement with manufacturers across Germany and Vietnam, the entire commercial pathway required to bring bacterial nanocellulose footwear to market was mapped, validated, and documented in the field. This was not a literature review. This was fieldwork.
           </p>
         </div>
       </ScrollReveal>
 
       <div style={{ padding: "1.8rem 1.5rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span className="bt" style={{ fontSize: ".5rem", letterSpacing: ".24em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>iCURE · BBSRC</span>
-        <span className="bt" style={{ fontSize: ".5rem", letterSpacing: ".24em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>VENA Project · shapescience.org</span>
+        <span className="bt" style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>iCURE · BBSRC</span>
+        <span className="bt" style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>VENA Project · shapescience.org</span>
       </div>
 
     </div>
