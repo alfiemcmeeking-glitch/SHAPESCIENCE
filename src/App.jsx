@@ -1094,12 +1094,20 @@ function ContactPage() {
 
 /* ─── APP ─── */
 export default function App() {
-  const [page, setPage] = useState("HOME");
+  const [page, setPage] = useState(() => {
+    const p = new URLSearchParams(window.location.search).get("page");
+    return p && PAGES.includes(p.toUpperCase()) ? p.toUpperCase() : "HOME";
+  });
   const [transitioning, setTransitioning] = useState(false);
   const navigate = useCallback((p) => {
     if(p===page) return;
     setTransitioning(true);
-    setTimeout(()=>{setPage(p);window.scrollTo(0,0);setTimeout(()=>setTransitioning(false),50);},400);
+    setTimeout(()=>{
+      setPage(p);
+      window.history.replaceState(null, "", p==="HOME" ? "/" : `/?page=${p}`);
+      window.scrollTo(0,0);
+      setTimeout(()=>setTransitioning(false),50);
+    },400);
   },[page]);
   useEffect(() => {
     const h = (e) => navigate(e.detail);
@@ -1130,4 +1138,3 @@ export default function App() {
     </main>
   </>;
 }
-
