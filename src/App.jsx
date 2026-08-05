@@ -176,6 +176,146 @@ function HomeTile({ src, label, caption, delay }) {
 }
 
 /* ─── HOME PAGE ─── */
+/* ─── PROMO VIDEO (YouTube, custom white controls, autoplay on scroll) ─── */
+function PromoVideo() {
+  const VIDEO_ID = "v16peprHzLs";
+  const wrapRef = useRef(null);
+  const playerRef = useRef(null);
+  const rafRef = useRef(null);
+  const mutedRef = useRef(true);
+  const [ready, setReady] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const [inView, setInView] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const progress = duration ? current / duration : 0;
+
+  /* load the YouTube IFrame API once, then build the player */
+  useEffect(() => {
+    function build() {
+      if (!window.YT || !window.YT.Player) return;
+      playerRef.current = new window.YT.Player("promo-yt", {
+        videoId: VIDEO_ID,
+        playerVars: { controls: 0, modestbranding: 1, rel: 0, playsinline: 1,
+          iv_load_policy: 3, disablekb: 1, fs: 0, start: 2 },
+        events: {
+          onReady: (e) => { e.target.mute(); setReady(true); setDuration(e.target.getDuration() || 0); },
+          onStateChange: (e) => setPlaying(e.data === window.YT.PlayerState.PLAYING),
+        },
+      });
+    }
+    if (window.YT && window.YT.Player) build();
+    else {
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => { if (prev) prev(); build(); };
+      if (!document.getElementById("yt-iframe-api")) {
+        const s = document.createElement("script");
+        s.id = "yt-iframe-api";
+        s.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(s);
+      }
+    }
+    return () => { try { playerRef.current && playerRef.current.destroy(); } catch (e) {} };
+  }, []);
+
+  /* autoplay when at least half in view, pause when it leaves */
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => setInView(e.isIntersecting && e.intersectionRatio >= 0.5),
+      { threshold: [0, 0.5, 1] }
+    );
+    if (wrapRef.current) obs.observe(wrapRef.current);
+    return () => obs.disconnect();
+  }, []);
+  useEffect(() => {
+    if (!ready || !playerRef.current) return;
+    try {
+      if (inView) { if (mutedRef.current) playerRef.current.mute(); playerRef.current.playVideo(); }
+      else playerRef.current.pauseVideo();
+    } catch (e) {}
+  }, [inView, ready]);
+
+  /* progress ticker */
+  useEffect(() => {
+    const tick = () => {
+      const p = playerRef.current;
+      if (p && p.getCurrentTime) { setCurrent(p.getCurrentTime() || 0); const d = p.getDuration() || 0; if (d) setDuration(d); }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const togglePlay = () => { const p = playerRef.current; if (!p) return; playing ? p.pauseVideo() : p.playVideo(); };
+  const toggleMute = () => {
+    const p = playerRef.current; if (!p) return;
+    if (muted) { p.unMute(); p.setVolume(100); mutedRef.current = false; setMuted(false); }
+    else { p.mute(); mutedRef.current = true; setMuted(true); }
+  };
+  const seek = (e) => {
+    const p = playerRef.current; if (!p || !duration) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    p.seekTo(ratio * duration, true);
+  };
+  const fmt = (s) => { s = Math.floor(s || 0); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+
+  return (
+    <section style={{ padding: "clamp(48px,9vw,110px) clamp(16px,6vw,80px)", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <ScrollReveal>
+        <div className="bt" style={{ fontSize: 12, letterSpacing: "0.3em", textTransform: "uppercase", opacity: 0.5, marginBottom: 22, textAlign: "center" }}>Watch · The Promo Film</div>
+      </ScrollReveal>
+      <div ref={wrapRef} data-clickable style={{
+        position: "relative", width: "100%", maxWidth: 1000, aspectRatio: "16 / 9",
+        borderRadius: 14, overflow: "hidden", background: "#000",
+        border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 30px 90px rgba(0,0,0,0.6)",
+      }}>
+        <div id="promo-yt" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />
+
+        {/* click anywhere on the video toggles play (and keeps the YT UI covered) */}
+        <div onClick={togglePlay} style={{ position: "absolute", inset: 0, cursor: "none" }} />
+
+        {/* big centre play button when paused */}
+        {!playing && (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+            <div style={{ width: 74, height: 74, borderRadius: "50%", border: "2px solid #fff", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.35)" }}>
+              <div style={{ width: 0, height: 0, borderLeft: "20px solid #fff", borderTop: "13px solid transparent", borderBottom: "13px solid transparent", marginLeft: 5 }} />
+            </div>
+          </div>
+        )}
+
+        {/* custom white control bar */}
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "16px 18px 13px", display: "flex", alignItems: "center", gap: 14, background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)" }}>
+          <button onClick={togglePlay} style={promoBtn}>
+            {playing
+              ? <span style={{ display: "flex", gap: 4 }}><span style={promoBar} /><span style={promoBar} /></span>
+              : <span style={{ width: 0, height: 0, borderLeft: "13px solid #fff", borderTop: "8px solid transparent", borderBottom: "8px solid transparent", marginLeft: 2 }} />}
+          </button>
+          <span className="bt" style={{ fontSize: 12, color: "#fff", opacity: 0.9, minWidth: 40, letterSpacing: "0.05em" }}>{fmt(current)}</span>
+          <div onClick={seek} style={{ flex: 1, height: 18, display: "flex", alignItems: "center", cursor: "none" }}>
+            <div style={{ position: "relative", width: "100%", height: 3, background: "rgba(255,255,255,0.28)", borderRadius: 3 }}>
+              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${progress * 100}%`, background: "#fff", borderRadius: 3 }} />
+              <div style={{ position: "absolute", left: `${progress * 100}%`, top: "50%", transform: "translate(-50%,-50%)", width: 11, height: 11, borderRadius: "50%", background: "#fff" }} />
+            </div>
+          </div>
+          <span className="bt" style={{ fontSize: 12, color: "#fff", opacity: 0.55, minWidth: 40, letterSpacing: "0.05em" }}>{fmt(duration)}</span>
+          <button onClick={toggleMute} style={promoBtn}>
+            {muted
+              ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"><path d="M11 5 6 9H2v6h4l5 4V5z" /><line x1="23" y1="9" x2="17" y2="15" /><line x1="17" y1="9" x2="23" y2="15" /></svg>
+              : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"><path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M18.5 6a9 9 0 0 1 0 12" /></svg>}
+          </button>
+        </div>
+      </div>
+      <ScrollReveal>
+        <p className="bt" style={{ fontSize: 13, opacity: 0.5, letterSpacing: "0.04em", marginTop: 16, textAlign: "center" }}>Tap for sound.</p>
+      </ScrollReveal>
+    </section>
+  );
+}
+const promoBtn = { background: "none", border: "none", cursor: "none", padding: 6, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" };
+const promoBar = { width: 4, height: 16, background: "#fff", display: "block" };
+
 function HomePage({ setPage }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { setTimeout(()=>setVisible(true), 200); }, []);
@@ -201,6 +341,8 @@ function HomePage({ setPage }) {
         <HeroTitle />
       </div>
     </section>
+
+    <PromoVideo />
 
     <section style={{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",padding:"120px clamp(24px,8vw,160px)"}}>
       {phrases.map((p,i)=><ScrollReveal key={i} delay={p.d}>
@@ -1138,3 +1280,4 @@ export default function App() {
     </main>
   </>;
 }
+
